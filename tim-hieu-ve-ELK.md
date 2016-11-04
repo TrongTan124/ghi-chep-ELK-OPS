@@ -36,6 +36,36 @@
 	
 ## Hiểu như nào là: A Distributed RESTful Search Engine
 - Distributed and Highly Available Search Engine
+	- Mỗi Index là full shard với một số cấu hình của shard
+	- Mỗi shard có một hoặc nhiều replica
+	- xử lý đọc và tìm kiến trên mõi replica shard.
+	
+- Multi Tenant with Multi Types
+	- Hỗ trợ nhiều hơn một index
+	- Hỗ trợ nhiều loại trên một index
+	- Cấu hình index level (số shard, index storage)
+	
+- Various set of APIs
+	- HTTP RESTful API
+	- Native Java API
+	- Tất cả API thực hiện thao tác node tự động mỗi khi định tuyến lại
+	
+- Document oriented
+	- Không cần định nghĩa trước schema
+	- Schema có thể được định nghĩa cho mỗi loại tùy vào quá trình indexing
+	
+- Tin cậy
+
+- Tìm kiếm (gần) theo thời gian thực
+
+- Xây dựng dựa trên Lucene
+	- Mỗi shard là một Lucene index đầy đủ chức năng
+	- Tất cả các ưu điểm của Lucene được khai phá thông qua cấu hình/plugin đơn giản.
+	
+- Hoạt động nhất quán
+	- Document level hoạt động thống nhất, độc lập, lâu dài
+	
+- Open Source under the Apache License, version 2 (“ALv2”)
 	
 # Tham khảo
 - [https://www.elastic.co/webinars/introduction-elk-stack](https://www.elastic.co/webinars/introduction-elk-stack)
