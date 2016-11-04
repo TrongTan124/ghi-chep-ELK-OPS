@@ -67,6 +67,12 @@
 	
 - Open Source under the Apache License, version 2 (“ALv2”)
 	
+	
+# 4. Logstash
+
+
+
+	
 # Tham khảo
 - [https://www.elastic.co/webinars/introduction-elk-stack](https://www.elastic.co/webinars/introduction-elk-stack)
 - [https://github.com/elastic/elasticsearch](https://github.com/elastic/elasticsearch)
