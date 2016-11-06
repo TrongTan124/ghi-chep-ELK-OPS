@@ -289,4 +289,4 @@ curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@filebeat-index-t
 apt-get install sshpass
 
 # sshpass -p '$PASSWD_CLIENT1' scp -o "StrictHostKeyChecking no" filebeat-index-template.json $USERNAME_CLIENT1@$IP_ELK_CLIENT1:/tmp/
-sshpass -p '$PASSWD_CLIENT1' scp /etc/pki/tls/certs/logstash-forwarder.crt $USERNAME_CLIENT1@$IP_ELK_CLIENT1:/tmp/
+sshpass -p $PASSWD_CLIENT1 scp /etc/pki/tls/certs/logstash-forwarder.crt $USERNAME_CLIENT1@$IP_ELK_CLIENT1:/tmp/
