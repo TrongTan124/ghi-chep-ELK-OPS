@@ -1,2 +1,24 @@
+# IP ELK server
+IP_ELK_SERVER=172.16.69.122
+
+# username login kibana
+KIBANA_USER_LOGIN=kibanaadmin
+
 # password login kibana
 KIBANA_PASSWD_LOGIN=tan124
+
+# Cau hinh Filebeat cho Logstach theo IP address hay DNS.
+# Mac dinh se cai filebeat de xu ly log tu client gui ve server.
+# gia tri cho FILEBEAT_BOOLEAN la true|false
+FILEBEAT_BOOLEAN=true
+
+# gia tri cho FILEBEAT_OPTION la ip_address|fqdn_dns
+FILEBEAT_OPTION=ip_address
+
+# Neu chon fqdn thi se khai bao dns cho bien nay
+ELK_SERVER_FQDN=ops.com
+
+# khai bao thong tin client de gui ssl
+IP_ELK_CLIENT1=172.16.69.162
+USERNAME_CLIENT1=tannt
+PASSWD_CLIENT1=1
