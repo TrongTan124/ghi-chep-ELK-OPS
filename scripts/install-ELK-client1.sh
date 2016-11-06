@@ -34,10 +34,13 @@ cp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/
 
 # Install Filebeat Package
 echo "deb https://packages.elastic.co/beats/apt stable main" |  sudo tee -a /etc/apt/sources.list.d/beats.list
-wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-apt-get update -y && apt-get install filebeat -y
+	wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+	apt-get update -y && apt-get install filebeat -y
 
+# configuration filebeat
 filebeatfile=/etc/filebeat/filebeat.yml
 test -f $filebeatfile.orgi || cp $filebeatfile $filebeatfile.orgi
+
+
 
 
