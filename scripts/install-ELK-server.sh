@@ -37,6 +37,7 @@ echocolor "Cai dat java 8"
 	echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true" | debconf-set-selections
 	# install
 	apt-get install oracle-java8-installer -y
+	bash -c "echo JAVA_HOME=/usr/lib/jvm/java-8-oracle/bin/ >> /etc/environment"
 
 echocolor "Kiem tra lai java sau khi cai dat"
 sleep 3
@@ -267,26 +268,33 @@ EOF
 
 # Restart Logstash
 echocolor "Khoi dong lai Logstash"
-/etc/init.d/logstash restart
-update-rc.d logstash defaults
+	/etc/init.d/logstash restart
+	update-rc.d logstash defaults
 
 # Load Kibana Dashboards (filebeat)
-mkdir -p /root/kibana
-cd /root/kibana
-curl -L -O https://download.elastic.co/beats/dashboards/beats-dashboards-1.2.2.zip
-apt-get -y install unzip
-unzip beats-dashboards-*.zip
-cd beats-dashboards-*
-./load.sh
+echocolor "Cau hinh Dashboard cho Kibana"
+	sleep 3
+	mkdir -p /root/kibana
+	cd /root/kibana
+	curl -L -O https://download.elastic.co/beats/dashboards/beats-dashboards-1.2.2.zip
+	apt-get -y install unzip
+	unzip beats-dashboards-*.zip
+	cd beats-dashboards-*
+	./load.sh
 
 # Load Filebeat Index Template in Elasticsearch
-mkdir -p /root/filebeat
-cd /root/filebeat
-curl -O https://gist.githubusercontent.com/thisismitch/3429023e8438cc25b86c/raw/d8c479e2a1adcea8b1fe86570e42abab0f10f364/filebeat-index-template.json
-curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@filebeat-index-template.json
+echocolor "Thiet lap filebeat index cho elasticsearch"
+	sleep 3
+	mkdir -p /root/filebeat
+	cd /root/filebeat
+	curl -O https://gist.githubusercontent.com/thisismitch/3429023e8438cc25b86c/raw/d8c479e2a1adcea8b1fe86570e42abab0f10f364/filebeat-index-template.json
+	curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@filebeat-index-template.json
 
 # Gui ssl_certificate tu ELK server toi client.
-apt-get install sshpass
+echocolor "Gui ssl tu ELK server sang client"
+	apt-get install sshpass
 
-# sshpass -p '$PASSWD_CLIENT1' scp -o "StrictHostKeyChecking no" filebeat-index-template.json $USERNAME_CLIENT1@$IP_ELK_CLIENT1:/tmp/
-sshpass -p $PASSWD_CLIENT1 scp /etc/pki/tls/certs/logstash-forwarder.crt $USERNAME_CLIENT1@$IP_ELK_CLIENT1:/tmp/
+	# sshpass -p '$PASSWD_CLIENT1' scp -o "StrictHostKeyChecking no" filebeat-index-template.json $USERNAME_CLIENT1@$IP_ELK_CLIENT1:/tmp/
+	sshpass -p $PASSWD_CLIENT1 scp -o "StrictHostKeyChecking no" /etc/pki/tls/certs/logstash-forwarder.crt $USERNAME_CLIENT1@$IP_ELK_CLIENT1:/tmp/
+
+echocolor "Hoan thanh cai dai ELK server"
