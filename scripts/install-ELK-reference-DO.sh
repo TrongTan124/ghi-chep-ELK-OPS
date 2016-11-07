@@ -9,10 +9,28 @@ echo
 # ---------------------------------------------------------------------
 rpm --import http://packages.elastic.co/GPG-KEY-elasticsearch
 # ---------------------------------------------------------------------
-printf "[elasticsearch-2.x] \nname=Elasticsearch repository for 2.x packages \nbaseurl=http://packages.elastic.co/elasticsearch/2.x/centos \ngpgcheck=1 \ngpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch \nenabled=1 \n" > /etc/yum.repos.d/elasticsearch.repo
-printf "[kibana-4.4] \nname=Kibana repository for 4.4.x packages \nbaseurl=http://packages.elastic.co/kibana/4.4/centos \ngpgcheck=1 \ngpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch \nenabled=1 \n" > /etc/yum.repos.d/kibana.repo
-printf "[nginx] \nname=nginx repo \nbaseurl=http://nginx.org/packages/rhel/6/x86_64/ \ngpgcheck=0 \nenabled=1 \n" > /etc/yum.repos.d/nginx.repo
-printf "[logstash-2.2] \nname=logstash repository for 2.2 packages \nbaseurl=http://packages.elasticsearch.org/logstash/2.2/centos \ngpgcheck=1 \ngpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch \nenabled=1 \n" > /etc/yum.repos.d/logstash.repo
+printf "[elasticsearch-2.x] \n
+name=Elasticsearch repository for 2.x packages \n
+baseurl=http://packages.elastic.co/elasticsearch/2.x/centos \ngpgcheck=1 \n
+gpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch \n
+enabled=1 \n
+" > /etc/yum.repos.d/elasticsearch.repo
+printf "[kibana-4.4] \nname=Kibana repository for 4.4.x packages \n
+baseurl=http://packages.elastic.co/kibana/4.4/centos \ngpgcheck=1 \n
+gpgkey=http://packages.elastic.co/GPG-KEY-elasticsearch \nenabled=1 \n
+" > /etc/yum.repos.d/kibana.repo
+printf "[nginx] \n
+name=nginx repo \n
+baseurl=http://nginx.org/packages/rhel/6/x86_64/ \n
+gpgcheck=0 \nenabled=1 \n
+" > /etc/yum.repos.d/nginx.repo
+printf "[logstash-2.2] \n
+name=logstash repository for 2.2 packages \n
+baseurl=http://packages.elasticsearch.org/logstash/2.2/centos \n
+gpgcheck=1 \n
+gpgkey=http://packages.elasticsearch.org/GPG-KEY-elasticsearch \n
+enabled=1 \n
+" > /etc/yum.repos.d/logstash.repo
 # ---------------------------------------------------------------------
 tput setaf 2; echo "Downloading prerequisites for ELK stack..."; tput sgr 0
 cd $ELK_DOWNLOAD_FILES
@@ -98,8 +116,30 @@ config_nginx() {
 tput setaf 2; echo "Enter a password for Kibana Administrator User (kibanaadmin):"; tput sgr 0
 htpasswd -c /etc/nginx/htpasswd.users kibanaadmin
 cp -p /etc/nginx/nginx.conf{,.bak}
-printf "user  nginx; \n worker_processes  1; \n error_log  /var/log/nginx/error.log warn; \n pid        /var/run/nginx.pid; \n events { \n     worker_connections  1024; \n } \n http { \n     include       /etc/nginx/mime.types; \n     default_type  application/octet-stream; \n     log_format  main  '$remote_addr - $remote_user [$time_local] "$request" ' \n                       '$status $body_bytes_sent "$http_referer" ' \n                       '"$http_user_agent" "$http_x_forwarded_for"'; \n     access_log  /var/log/nginx/access.log  main; \n     sendfile        on; \n     #tcp_nopush     on; \n     keepalive_timeout  65; \n     #gzip  on; \n     include /etc/nginx/conf.d/*.conf; \n } \n" > /etc/nginx/nginx.conf
-echo -e "server {\n    listen 80;\n    server_name $SERVER_NAME;\n    auth_basic \"Restricted Access\";\n    auth_basic_user_file /etc/nginx/htpasswd.users;\n    location / {\n        proxy_pass http://localhost:5601;\n        proxy_http_version 1.1;\n        proxy_set_header Upgrade \$http_upgrade;\n        proxy_set_header Connection 'upgrade';\n        proxy_set_header Host \$host;\n        proxy_cache_bypass \$http_upgrade;        \n    }\n}\n" > /etc/nginx/conf.d/kibana.conf
+printf "user  nginx; \n worker_processes  1; \n 
+error_log  /var/log/nginx/error.log warn; \n 
+pid        /var/run/nginx.pid; \n 
+events { \n     
+worker_connections  1024; \n 
+} \n 
+http { \n     
+include       /etc/nginx/mime.types; \n     
+default_type  application/octet-stream; \n     
+log_format  main  '$remote_addr - $remote_user [$time_local] "$request" ' \n                       '$status $body_bytes_sent "$http_referer" ' \n                       '"$http_user_agent" "$http_x_forwarded_for"'; \n     access_log  /var/log/nginx/access.log  main; \n     sendfile        on; \n     #tcp_nopush     on; \n     keepalive_timeout  65; \n     #gzip  on; \n     include /etc/nginx/conf.d/*.conf; \n } \n" > /etc/nginx/nginx.conf
+echo -e "server {\n    
+listen 80;\n    
+server_name $SERVER_NAME;\n    
+auth_basic \"Restricted Access\";\n    
+auth_basic_user_file /etc/nginx/htpasswd.users;\n    
+location / {\n        
+proxy_pass http://localhost:5601;\n        
+proxy_http_version 1.1;\n        
+proxy_set_header Upgrade \$http_upgrade;\n        
+proxy_set_header Connection 'upgrade';\n        proxy_set_header Host \$host;\n        
+proxy_cache_bypass \$http_upgrade;        \n    
+}\n
+}\n
+" > /etc/nginx/conf.d/kibana.conf
 chkconfig --add nginx
 service nginx start
 tput setaf 2; echo "Configured Nginx successfully..."; tput sgr 0
