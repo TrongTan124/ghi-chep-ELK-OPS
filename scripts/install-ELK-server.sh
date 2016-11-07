@@ -264,7 +264,9 @@ output {
 EOF
 
 # Test configuration Logstash
+echocolor "Kiem tra lai file config logstash"
 /opt/logstash/bin/logstash --configtest -f /etc/logstash/conf.d/
+sleep 3
 
 # Restart Logstash
 echocolor "Khoi dong lai Logstash"

@@ -97,5 +97,80 @@ filter {
 # setsebool -P httpd_can_network_connect 1
 ```
 
+Config logstash cho network cisco
+```sh
+input {
+        udp {
+                port => 10514
+                type => "cisco-fw"
+        }
+}
+
+filter {
+
+        # Extract fields from the each of the detailed message types
+        # The patterns provided below are included in core of LogStash 1.4.2.
+        grok {
+                match => [
+                        "message", "%{CISCOFW106001}",
+                        "message", "%{CISCOFW106006_106007_106010}",
+                        "message", "%{CISCOFW106014}",
+                        "message", "%{CISCOFW106015}",
+                        "message", "%{CISCOFW106021}",
+                        "message", "%{CISCOFW106023}",
+                        "message", "%{CISCOFW106100}",
+                        "message", "%{CISCOFW110002}",
+                        "message", "%{CISCOFW302010}",
+                        "message", "%{CISCOFW302013_302014_302015_302016}",
+                        "message", "%{CISCOFW302020_302021}",
+                        "message", "%{CISCOFW305011}",
+                        "message", "%{CISCOFW313001_313004_313008}",
+                        "message", "%{CISCOFW313005}",
+                        "message", "%{CISCOFW402117}",
+                        "message", "%{CISCOFW402119}",
+                        "message", "%{CISCOFW419001}",
+                        "message", "%{CISCOFW419002}",
+                        "message", "%{CISCOFW500004}",
+                        "message", "%{CISCOFW602303_602304}",
+                        "message", "%{CISCOFW710001_710002_710003_710005_710006}",
+                        "message", "%{CISCOFW713172}",
+                        "message", "%{CISCOFW733100}"
+                ]
+        }
+
+        # Parse the syslog severity and facility
+        syslog_pri { }
+
+# Do a DNS lookup for the sending host
+# Otherwise host field will contain an
+# IP address instead of a hostname
+dns {
+    reverse => [ "host" ]
+    action => "replace"
+  }
+
+geoip {
+      source => "src_ip"
+      target => "geoip"
+      database => "/etc/logstash/GeoLiteCity.dat"
+      add_field => [ "[geoip][coordinates]", "%{[geoip][longitude]}" ]
+      add_field => [ "[geoip][coordinates]", "%{[geoip][latitude]}"  ]
+    }
+    mutate {
+      convert => [ "[geoip][coordinates]", "float"]
+    }
+    # do GeoIP lookup for the ASN/ISP information.
+    geoip {
+      database => "/etc/logstash/GeoIPASNum.dat"
+      source => "src_ip"
+    }
+}
+
+output {
+  elasticsearch { host => localhost }
+}
+```
+
 # Tham khảo
 - [https://www.digitalocean.com/community/tutorials/adding-logstash-filters-to-improve-centralized-logging](https://www.digitalocean.com/community/tutorials/adding-logstash-filters-to-improve-centralized-logging)
+- [http://ict.renevdmark.nl/2015/10/22/cisco-asa-alerts-and-kibana/](http://ict.renevdmark.nl/2015/10/22/cisco-asa-alerts-and-kibana/)
