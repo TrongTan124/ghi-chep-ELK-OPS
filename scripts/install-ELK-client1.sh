@@ -38,9 +38,9 @@ echo "deb https://packages.elastic.co/beats/apt stable main" |  sudo tee -a /etc
 	apt-get update -y && apt-get install filebeat -y
 
 # configuration filebeat
-filebeatfile=/etc/filebeat/filebeat.yml
-test -f $filebeatfile.orgi || cp $filebeatfile $filebeatfile.orgi
-
+echocolor "Cau hinh Filebeat"
+	filebeatfile=/etc/filebeat/filebeat.yml
+	test -f $filebeatfile.orgi || cp $filebeatfile $filebeatfile.orgi
 
 
 

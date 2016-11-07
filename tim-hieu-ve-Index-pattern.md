@@ -11,6 +11,8 @@ Các beat index pattern cần được cài đặt trên cả ELK server và cá
 - [filebeat-]YYYY.MM.DD
 - [winlogbeat-]YYYY.MM.DD
 
+Windows sử dụng nxlog để gửi log từ Client đến ELK server
+
 ---------
 ## Filebeat
 
@@ -57,4 +59,5 @@ download the sample dashboards archive to your home directory
 
 # Tham khảo
 - [https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04](https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04)
-- []()
+- [https://www.elastic.co/guide/en/beats/filebeat/current/how-filebeat-works.html](https://www.elastic.co/guide/en/beats/filebeat/current/how-filebeat-works.html)
+
