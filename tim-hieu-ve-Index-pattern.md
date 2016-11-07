@@ -1,5 +1,7 @@
 ﻿# 1. Index pattern là gì? Tại sao phải dùng?
 
+Beats is the platform for single-purpose data shippers. They install as lightweight agents and send data from hundreds or thousands of machines to Logstash or Elasticsearch.
+
 ELK cần sử dụng các "beat" để làm shipper giúp gửi các loại dữ liệu từ client tới Logstash.
 
 Các beat index pattern cần được cài đặt trên cả ELK server và các client. Trên ELK server, các beat sẽ kết hợp với các thành phần để lọc dữ liệu, đánh chỉ mục, hiển thị.

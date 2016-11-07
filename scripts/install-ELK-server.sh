@@ -148,7 +148,9 @@ server {
 EOF
 
 # checl nginx config ok
+echocolor "Kiem tra cau hinh nginx"
 nginx -t
+sleep 3
 
 # restart nginx
 /etc/init.d/nginx restart
@@ -170,7 +172,7 @@ echocolor "Cai dat Logstash"
 echocolor "Cau hinh Logstash"
 	sleep 3
 
-while [ $FILEBEAT_BOOLEAN ]; do
+while [[ $SSL_BOOLEAN ]]; do
 
 		# Generate SSL Certificates
 		# This script use filebeat to ship logs from client to ELK serrver, we need to create an SSL Certificate and key pair.
@@ -184,7 +186,7 @@ while [ $FILEBEAT_BOOLEAN ]; do
 		# Option 1: allow you to use IP addresses ELK Server
 		# Option 2: If you have a DNS setup that will allow your client servers to resolve the IP address of the ELK Server
 
-	if [ $FILEBEAT_OPTION = ip_address ]; then
+	if [ $SSL_OPTION = ip_address ]; then
 
 		# Config Option 1: IP Address
 		# you will have to add your ELK Server's private IP address to the subjectAltName (SAN) field of the SSL certificate that we are about to generate. 
@@ -199,7 +201,7 @@ while [ $FILEBEAT_BOOLEAN ]; do
 		openssl req -config /etc/ssl/openssl.cnf -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt
 		break
 
-	elif [ $FILEBEAT_OPTION = fqdn_dns ]; then
+	elif [ $SSL_OPTION = fqdn_dns ]; then
 		# Config Option 2: FQDN (DNS)
 		# generate the SSL certificate and private key, in the appropriate locations (/etc/pki/tls/...)
 		cd /etc/pki/tls
@@ -209,59 +211,100 @@ while [ $FILEBEAT_BOOLEAN ]; do
 	else
 		echocolor "Neu ban chon cai dat Filebeat, ban phai chon ip_address hoac fqdn_dns. Ban hay dien lai optione se cai dat."
 		read input_option
-		FILEBEAT_OPTION=$input_option
-		FILEBEAT_BOOLEAN=true
+		SSL_OPTION=$input_option
+		SSL_BOOLEAN=true
 	fi
-
 done
 
-# Create a configuration file and setup filebeat input
-cat << EOF > /etc/logstash/conf.d/02-beats-input.conf
-###
-input {
-  beats {
-    port => 5044
-    ssl => true
-    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
-    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
-  }
-}
-EOF
+if [[ $FILEBEAT_BOOLEAN ]]; then
+	# Create a configuration file and setup filebeat input
+	cat << EOF > /etc/logstash/conf.d/02-beats-input.conf
+	###
+	input {
+	  beats {
+	    port => 5044
+	    ssl => true
+	    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
+	    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
+	  }
+	}
+	EOF
 
-# Add port firewall
-ufw allow 5044
+	# Add port firewall
+	ufw allow 5044
 
-# Create a configuration file to add filter for syslog message
-cat << EOF > /etc/logstash/conf.d/10-syslog-filter.conf
-###
-filter {
-  if [type] == "syslog" {
-    grok {
-      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
-      add_field => [ "received_at", "%{@timestamp}" ]
-      add_field => [ "received_from", "%{host}" ]
-    }
-    syslog_pri { }
-    date {
-      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
-    }
-  }
-}
-EOF
+	# Create a configuration file to add filter for syslog message
+	cat << EOF > /etc/logstash/conf.d/10-syslog-filter.conf
+	###
+	filter {
+	  if [type] == "syslog" {
+	    grok {
+	      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+	      add_field => [ "received_at", "%{@timestamp}" ]
+	      add_field => [ "received_from", "%{host}" ]
+	    }
+	    syslog_pri { }
+	    date {
+	      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+	    }
+	  }
+	}
+	EOF
 
-# Use grok to parse incoming syslog logs to make it structured and query-able
-cat << EOF > /etc/logstash/conf.d/30-elasticsearch-output.conf
-###
-output {
-  elasticsearch {
-    hosts => ["localhost:9200"]
-    sniffing => true
-    manage_template => false
-    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
-    document_type => "%{[@metadata][type]}"
-  }
-}
-EOF
+	# Use grok to parse incoming syslog logs to make it structured and query-able
+	cat << EOF > /etc/logstash/conf.d/30-elasticsearch-output.conf
+	###
+	output {
+	  elasticsearch {
+	    hosts => ["localhost:9200"]
+	    sniffing => true
+	    manage_template => false
+	    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
+	    document_type => "%{[@metadata][type]}"
+	  }
+	}
+	EOF
+elif [[ $FORWARDER_BOOLEAN ]]; then
+	# Cai dat viec gui du lieu tu client toi server theo logstash forwarder
+	# Tao file cau hinh thiet lap giao thuc input mà Logstash Forwarder sử dụng
+	cat << EOF > /etc/logstash/conf.d/01-lumberjack-input.conf
+	###
+	input {
+	  	lumberjack {
+	    port => 5000
+	    type => "logs"
+	    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
+	    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
+	  }
+	}
+	EOF
+
+	# Tao file cau hinh thiet lap filter message
+	cat << EOF > /etc/logstash/conf.d/10-syslog.conf
+	###
+	filter {
+	  if [type] == "syslog" {
+	    grok {
+	      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+	      add_field => [ "received_at", "%{@timestamp}" ]
+	      add_field => [ "received_from", "%{host}" ]
+	    }
+	    syslog_pri { }
+	    date {
+	      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+	    }
+	  }
+	}
+	EOF
+
+	# Tao file cau hinh output message
+	cat << EOF > /etc/logstash/conf.d/30-lumberjack-output.conf
+	output {
+	  elasticsearch { host => localhost }
+	  stdout { codec => rubydebug }
+	}
+
+fi
 
 # Test configuration Logstash
 echocolor "Kiem tra lai file config logstash"
