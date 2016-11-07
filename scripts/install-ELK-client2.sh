@@ -11,6 +11,7 @@ sleep 3
 echo 'deb http://packages.elasticsearch.org/logstashforwarder/debian stable main' | sudo tee /etc/apt/sources.list.d/logstashforwarder.list
 wget -O - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
 
+CHECK_MACHINE=`uname -m`
 if [ "$CHECK_MACHINE" = "x86_64" ]; then
 	apt-get update -y && apt-get install logstash-forwarder -y
 else 
@@ -48,4 +49,8 @@ cat << EOF > /etc/logstash-forwarder
 EOF
 
 # restart logstash forwarder
+echocolor "Khoi dong lai logstash forwarder"
+sleep 3
 service logstash-forwarder restart
+
+echocolor "Hoan thanh cai dat!"

@@ -209,7 +209,7 @@ while [[ $SSL_BOOLEAN ]]; do
 		break
 
 	else
-		echocolor "Neu ban chon cai dat Filebeat, ban phai chon ip_address hoac fqdn_dns. Ban hay dien lai optione se cai dat."
+		echocolor "Neu ban chon cai dat ssh, ban phai chon ip_address hoac fqdn_dns. Ban hay dien lai option se cai dat."
 		read input_option
 		SSL_OPTION=$input_option
 		SSL_BOOLEAN=true
@@ -218,91 +218,92 @@ done
 
 if [[ $FILEBEAT_BOOLEAN ]]; then
 	# Create a configuration file and setup filebeat input
-	cat << EOF > /etc/logstash/conf.d/02-beats-input.conf
-	###
-	input {
-	  beats {
-	    port => 5044
-	    ssl => true
-	    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
-	    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
-	  }
-	}
-	EOF
+cat << EOF > /etc/logstash/conf.d/02-beats-input.conf
+###
+input {
+  beats {
+    port => 5044
+    ssl => true
+    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
+    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
+  }
+}
+EOF
 
 	# Add port firewall
 	ufw allow 5044
 
 	# Create a configuration file to add filter for syslog message
-	cat << EOF > /etc/logstash/conf.d/10-syslog-filter.conf
-	###
-	filter {
-	  if [type] == "syslog" {
-	    grok {
-	      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
-	      add_field => [ "received_at", "%{@timestamp}" ]
-	      add_field => [ "received_from", "%{host}" ]
-	    }
-	    syslog_pri { }
-	    date {
-	      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
-	    }
-	  }
-	}
-	EOF
+cat << EOF > /etc/logstash/conf.d/10-syslog-filter.conf
+###
+filter {
+  if [type] == "syslog" {
+    grok {
+      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+      add_field => [ "received_at", "%{@timestamp}" ]
+      add_field => [ "received_from", "%{host}" ]
+    }
+    syslog_pri { }
+    date {
+      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+    }
+  }
+}
+EOF
 
 	# Use grok to parse incoming syslog logs to make it structured and query-able
-	cat << EOF > /etc/logstash/conf.d/30-elasticsearch-output.conf
-	###
-	output {
-	  elasticsearch {
-	    hosts => ["localhost:9200"]
-	    sniffing => true
-	    manage_template => false
-	    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
-	    document_type => "%{[@metadata][type]}"
-	  }
-	}
-	EOF
+cat << EOF > /etc/logstash/conf.d/30-elasticsearch-output.conf
+###
+output {
+  elasticsearch {
+    hosts => ["localhost:9200"]
+    sniffing => true
+    manage_template => false
+    index => "%{[@metadata][beat]}-%{+YYYY.MM.dd}"
+    document_type => "%{[@metadata][type]}"
+  }
+}
+EOF
 elif [[ $FORWARDER_BOOLEAN ]]; then
 	# Cai dat viec gui du lieu tu client toi server theo logstash forwarder
 	# Tao file cau hinh thiet lap giao thuc input mà Logstash Forwarder sử dụng
-	cat << EOF > /etc/logstash/conf.d/01-lumberjack-input.conf
-	###
-	input {
-	  	lumberjack {
-	    port => 5000
-	    type => "logs"
-	    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
-	    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
-	  }
-	}
-	EOF
+cat << EOF > /etc/logstash/conf.d/01-lumberjack-input.conf
+###
+input {
+  	lumberjack {
+    port => 5000
+    type => "logs"
+    ssl_certificate => "/etc/pki/tls/certs/logstash-forwarder.crt"
+    ssl_key => "/etc/pki/tls/private/logstash-forwarder.key"
+  }
+}
+EOF
 
 	# Tao file cau hinh thiet lap filter message
-	cat << EOF > /etc/logstash/conf.d/10-syslog.conf
-	###
-	filter {
-	  if [type] == "syslog" {
-	    grok {
-	      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
-	      add_field => [ "received_at", "%{@timestamp}" ]
-	      add_field => [ "received_from", "%{host}" ]
-	    }
-	    syslog_pri { }
-	    date {
-	      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
-	    }
-	  }
-	}
-	EOF
+cat << EOF > /etc/logstash/conf.d/10-syslog.conf
+###
+filter {
+  if [type] == "syslog" {
+    grok {
+      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
+      add_field => [ "received_at", "%{@timestamp}" ]
+      add_field => [ "received_from", "%{host}" ]
+    }
+    syslog_pri { }
+    date {
+      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+    }
+  }
+}
+EOF
 
 	# Tao file cau hinh output message
-	cat << EOF > /etc/logstash/conf.d/30-lumberjack-output.conf
-	output {
-	  elasticsearch { host => localhost }
-	  stdout { codec => rubydebug }
-	}
+cat << EOF > /etc/logstash/conf.d/30-lumberjack-output.conf
+output {
+  elasticsearch { host => localhost }
+  stdout { codec => rubydebug }
+}
+EOF
 fi
 
 # Test configuration Logstash
