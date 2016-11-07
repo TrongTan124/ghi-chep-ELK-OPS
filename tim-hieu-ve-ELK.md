@@ -2,6 +2,9 @@
 
 - Elasticsearch, Logstash, Kibana (ELK) được kết hợp lại để tạo lên một ứng dụng cung cấp sự kiện theo thời gian thực từ các nguồn dữ liệu có cấu trúc hoặc không cấu trúc.
 
+Workflow:
+![elk-infrastructure](/images/elk-infrastructure.png)
+
 # 2. Các thành phần
 
 - Elasticsearch phụ trách tìm kiếm chuyên sâu và phân tích dữ liệu
