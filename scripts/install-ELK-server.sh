@@ -172,7 +172,7 @@ echocolor "Cai dat Logstash"
 echocolor "Cau hinh Logstash"
 	sleep 3
 
-while [[ $SSL_BOOLEAN ]]; do
+while [ "$SSL_BOOLEAN" = true ]; do
 
 		# Generate SSL Certificates
 		# This script use filebeat to ship logs from client to ELK serrver, we need to create an SSL Certificate and key pair.
@@ -216,7 +216,7 @@ while [[ $SSL_BOOLEAN ]]; do
 	fi
 done
 
-if [[ $FILEBEAT_BOOLEAN ]]; then
+if [ "$FILEBEAT_BOOLEAN" = true ]; then
 	# Create a configuration file and setup filebeat input
 cat << EOF > /etc/logstash/conf.d/02-beats-input.conf
 ###
@@ -264,7 +264,7 @@ output {
   }
 }
 EOF
-elif [[ $FORWARDER_BOOLEAN ]]; then
+elif [ "$FORWARDER_BOOLEAN" = true ]; then
 	# Cai dat viec gui du lieu tu client toi server theo logstash forwarder
 	# Tao file cau hinh thiet lap giao thuc input mà Logstash Forwarder sử dụng
 cat << EOF > /etc/logstash/conf.d/01-lumberjack-input.conf
@@ -316,7 +316,7 @@ echocolor "Khoi dong lai Logstash"
 	/etc/init.d/logstash restart
 	update-rc.d logstash defaults
 
-if [[ $FILEBEAT_BOOLEAN ]]; then
+if [ "$FILEBEAT_BOOLEAN" = true ]; then
 	# Load Kibana Dashboards (filebeat)
 	echocolor "Cau hinh Dashboard cho Kibana"
 		sleep 3
