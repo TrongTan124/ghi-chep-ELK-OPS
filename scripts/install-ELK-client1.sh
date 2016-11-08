@@ -39,8 +39,16 @@ echo "deb https://packages.elastic.co/beats/apt stable main" |  sudo tee -a /etc
 
 # configuration filebeat
 echocolor "Cau hinh Filebeat"
+	sleep 3
 	filebeatfile=/etc/filebeat/filebeat.yml
 	test -f $filebeatfile.orgi || cp $filebeatfile $filebeatfile.orgi
 
+	sed -i_bac -e '/- \/var/ s/^/#/' -e '/ paths:/a \        - /var/log/messages' -e '/ paths:/a \        - /var/log/secure' -e 's/#document_type:.*$/document_type: syslog/' -e '/elasticsearch:/,/# Logstash/ s/^/#/' -e 's/#logstash:/logstash:/' -e \"/logstash:/,+2 s/#hosts: \[\\\"localhost:/hosts: \[\\\"$IP_ELK_SERVER:/\" -e '/hosts.*5044/a \    bulk_max_size: 1024' -e '/logstash:/,+30 s/#tls:/tls:/' -e '/ tls:/,+5 s/#certificate_authorities:.*/certificate_authorities: \[\"\/etc\/pki\/tls\/certs\/logstash-forwarder.crt\"\]/' $filebeatfile
 
+# Restart filebeat
+echocolor "Khoi dong lai filebeat"
+	sleep 3
+	service filebeat restart
+	update-rc.d filebeat defaults
 
+echocolor "install ELK client done"

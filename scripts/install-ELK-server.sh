@@ -299,6 +299,7 @@ EOF
 
 	# Tao file cau hinh output message
 cat << EOF > /etc/logstash/conf.d/30-lumberjack-output.conf
+###
 output {
   elasticsearch { host => localhost }
   stdout { codec => rubydebug }
