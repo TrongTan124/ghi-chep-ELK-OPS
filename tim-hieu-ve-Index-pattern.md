@@ -37,8 +37,10 @@ Topbeat là một trong vài "Beats" data shipper, thực hiện việc gửi c�
 
 ---------
 # 3. Cài đặt, cấu hình
+
 ## a. Filebeat
 
+- [Cấu hình filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-details.html#_level)
 
 ## b. Packetbeat
 
@@ -58,6 +60,43 @@ download the sample dashboards archive to your home directory
 ```
 
 ## d. Winlobeat
+
+# TIP fix bug
+
+Filebeat
+----
+The registry file controls where the process reads from each time it opens the file
+Make sure to stop filebeat, remove the registry file and start it again so it starts sending from scratch
+
+- Trường hợp filebeat không thực hiện load log và send tới logstash, cần dừng filebeat
+```sh
+# /etc/init.d/filebeat stop
+```
+-  xóa file registry
+```sh
+# rm -rf /var/lib/filebeat/registry
+```
+- Sau đó restart lại filebeat:
+```sh
+# /etc/init.d/filebeat start
+```
+
+
+Trường hợp filebeat để cấu hình mặc định sẽ send log vào file /var/log/syslog. nên sửa dòng cấu hình tại /etc/filebeat/filebeat.yml đoạn sau:
+```sh
+logging:
+  to_syslog: false
+  to_files: true
+  files:
+    path: /var/log/myfilebeat
+    name: myfilebeat
+    rotateeverybytes: 1048576000 # = 1GB
+    keepfiles: 7
+  selectors: ["*"]
+  level: info
+```
+
+----
 
 # Tham khảo
 - [https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04](https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04)
