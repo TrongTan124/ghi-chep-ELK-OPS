@@ -4,6 +4,16 @@ Logstash là một công cụ mạnh mẽ cho việc tập trung và phân tích
 
 # 2. Cấu hình
 
+Việc cấu hình thường được thực hiện là khai báo Grok để matching dữ liệu đầu vào ở file filter. 
+
+Có 2 phần khai báo.
+	**type** được khai báo trước, nó nằm ở 
+```sh
+# /opt/logstash/vendor/bundle/jruby/1.9/gems/logstash-patterns-core-2.0.5/patterns
+```
+đối với phiên bản logstash
+
+
 Sau đây là một số bộ lọc được sử dụng tại logstash, các client cần được khai báo đúng type để logstash chọn đúng grok
 
 ```sh
