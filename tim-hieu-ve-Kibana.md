@@ -10,6 +10,9 @@ interface của nó để lọc và hiển thị các log message thu thập b�
 Kiểm tra version của Kibana:
 ```sh
 # /opt/kibana/bin/kibana --version
+
+==>
+4.5.4
 ```
 
 # Tham khảo

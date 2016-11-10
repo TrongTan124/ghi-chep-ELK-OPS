@@ -1,6 +1,21 @@
 ﻿Kiểm tra version của Elasticsearch:
 ```sh
 # curl localhost:9200
+
+==>
+{
+  "name" : "My First Node",
+  "cluster_name" : "mycluster1",
+  "cluster_uuid" : "6N3SXnpvSzqD4DCqsTc8MA",
+  "version" : {
+    "number" : "2.4.1",
+    "build_hash" : "c67dc32e24162035d18d6fe1e952c4cbcbe79d16",
+    "build_timestamp" : "2016-09-27T18:57:55Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.2"
+  },
+  "tagline" : "You Know, for Search"
+}
 ```
 
 # 1. Indexing

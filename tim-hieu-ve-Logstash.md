@@ -6,7 +6,10 @@ Logstash là một công cụ mạnh mẽ cho việc tập trung và phân tích
 
 Kiểm tra version logstash:
 ```sh
-# /opt/logstash/bin/logstash --version 
+# /opt/logstash/bin/logstash --version
+
+==>
+logstash 2.3.4
 ```
 
 Việc cấu hình thường được thực hiện là khai báo Grok để matching dữ liệu đầu vào ở file filter. 
