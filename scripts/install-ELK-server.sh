@@ -322,18 +322,19 @@ echocolor "Khoi dong lai Logstash"
 	/etc/init.d/logstash restart
 	update-rc.d logstash defaults
 
-if [ "$FILEBEAT_BOOLEAN" = true ]; then
-	# Load Kibana Dashboards (filebeat)
-	echocolor "Cau hinh Dashboard cho Kibana"
-		sleep 3
-		mkdir -p /root/kibana
-		cd /root/kibana
-		curl -L -O https://download.elastic.co/beats/dashboards/beats-dashboards-1.2.2.zip
-		apt-get -y install unzip
-		unzip beats-dashboards-*.zip
-		cd beats-dashboards-*
-		./load.sh
 
+# Load Kibana Dashboards (filebeat)
+echocolor "Cau hinh Dashboard cho Kibana"
+	sleep 3
+	mkdir -p /root/kibana
+	cd /root/kibana
+	curl -L -O https://download.elastic.co/beats/dashboards/beats-dashboards-1.2.2.zip
+	apt-get -y install unzip
+	unzip beats-dashboards-*.zip
+	cd beats-dashboards-*
+	./load.sh
+
+if [ "$FILEBEAT_BOOLEAN" = true ]; then
 	# Load Filebeat Index Template in Elasticsearch
 	echocolor "Thiet lap filebeat index cho elasticsearch"
 		sleep 3
@@ -342,6 +343,15 @@ if [ "$FILEBEAT_BOOLEAN" = true ]; then
 		curl -O https://gist.githubusercontent.com/thisismitch/3429023e8438cc25b86c/raw/d8c479e2a1adcea8b1fe86570e42abab0f10f364/filebeat-index-template.json
 		curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@filebeat-index-template.json
 fi
+
+if [[ "$PACKETBEAT_BOOLEAN" = true ]]; then
+	echocolor "Thiet lap packetbeat index cho elasticsearch"
+		mkdir -p /root/packetbeat
+		cd /root/packetbeat
+		curl -O https://raw.githubusercontent.com/elastic/beats/master/packetbeat/packetbeat.template-es2x.json
+		curl -XPUT 'http://localhost:9200/_template/packetbeat' -d@packetbeat.template-es2x.json
+fi
+
 # Gui ssl_certificate tu ELK server toi client.
 echocolor "Gui ssl tu ELK server sang client"
 	apt-get install sshpass

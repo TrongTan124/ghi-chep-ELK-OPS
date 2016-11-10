@@ -1,15 +1,15 @@
-﻿# 1. Index pattern là gì? Tại sao phải dùng?
+﻿# 1. Beat là gì? Tại sao phải dùng?
 
 Beats is the platform for single-purpose data shippers. They install as lightweight agents and send data from hundreds or thousands of machines to Logstash or Elasticsearch.
 
-ELK cần sử dụng các "beat" để làm shipper giúp gửi các loại dữ liệu từ client tới Logstash.
+ELK cần sử dụng các "beat" để làm shipper giúp gửi các loại dữ liệu từ client tới Server.
 
 Các beat index pattern cần được cài đặt trên cả ELK server và các client. Trên ELK server, các beat sẽ kết hợp với các thành phần để lọc dữ liệu, đánh chỉ mục, hiển thị.
 
 # 2. Các index pattern thường dùng
 
-- [packetbeat-]YYYY.MM.DD
-- [topbeat-]YYYY.MM.DD
+- [packetbeat-]YYYY.MM.DD	: thực hiện gửi dữ liệu capture từ các port về server
+- [topbeat-]YYYY.MM.DD	:
 - [filebeat-]YYYY.MM.DD
 - [winlogbeat-]YYYY.MM.DD
 
@@ -22,11 +22,22 @@ Windows sử dụng nxlog để gửi log từ Client đến ELK server
 ---------
 ## Packetbeat
 
+Check version packetbeat
+```sh
+# /usr/bin/packetbeat -version
+packetbeat version 1.3.1 (amd64)
+```
+
+Hạn chế của packetbeat là đang config sẵn các port theo template, mục đích của template dùng để đánh chỉ mục trong Elasticsearch và Kibana.
+
+Nếu muốn add thêm port của các giao thức khác, cần phải chỉnh sửa lại file template.json có sẵn, add thêm các trường vào, xóa template có sẵn và import lại.
+
+Tham khảo thêm các cấu hình tại [đây](https://github.com/elastic/beats/tree/master/packetbeat)
 
 ---------
 ## Topbeat
 
-Topbeat là một trong vài "Beats" data shipper, thực hiện việc gửi các loại dữ liệu các nhau từ Server tới Elasticsearch. Cho phép bạn thu thập thông tin về CPU, memory, process activity.
+Topbeat là một trong các "Beats" data shipper, thực hiện việc gửi các loại dữ liệu các nhau từ Server tới Elasticsearch. Cho phép bạn thu thập thông tin về CPU, memory, process activity.
 
 **Yêu câu**:
 - Đã cài đặt ELK
