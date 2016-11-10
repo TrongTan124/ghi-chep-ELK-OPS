@@ -1,4 +1,9 @@
-﻿# 1. Indexing
+﻿Kiểm tra version của Elasticsearch:
+```sh
+# curl localhost:9200
+```
+
+# 1. Indexing
 
 
 # 2. Searching
