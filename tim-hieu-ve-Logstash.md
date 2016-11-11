@@ -22,54 +22,11 @@ Có 2 phần khai báo.
 đối với phiên bản logstash
 
 
-Sau đây là một số bộ lọc được sử dụng tại logstash, các client cần được khai báo đúng type để logstash chọn đúng grok
+Sau đây là một số bộ lọc được sử dụng tại logstash, các client cần được khai báo đúng type để logstash chọn đúng pattern
 
-```sh
-filter {
-  if [type] == "linuxlog" {
-    grok {
-      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
-    }
-  }
-  if [type] == "windowslog" {
-    grok {
-      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}?: %{POSINT:syslog_pid}?: %{GREEDYDATA:syslog_message}" }
-    }
-  }
-  if [type] == "syslog" {
-    grok {
-      match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" }
-      add_field => [ "received_at", "%{@timestamp}" ]
-      add_field => [ "received_from", "%{host}" ]
-    }
-    syslog_pri { }
-    date {
-      match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
-    }
-  }
-}
-```
 
 Configuration Logstash example:
 ```sh
-input {
-  tcp {
-    port => 5000
-    type => windowslog
-  }
-  udp {
-    port => 5000
-    type => windowslog
-  }
-  tcp {
-    port => 5001
-    type => linuxlog
-  }
-  udp {
-    port => 5001
-    type => linuxlog
-  }
-}
 filter {
   if [type] == "linuxlog" {
     grok {
@@ -81,10 +38,6 @@ filter {
       match => { "message" => "%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{DATA:syslog_program}?: %{POSINT:syslog_pid}?: %{GREEDYDATA:syslog_message}" }
     }
   }
-}
-output {
-  elasticsearch { host => localhost }
-  stdout { codec => rubydebug }
 }
 ```
 
@@ -117,15 +70,7 @@ filter {
 
 Config logstash cho network cisco
 ```sh
-input {
-        udp {
-                port => 10514
-                type => "cisco-fw"
-        }
-}
-
 filter {
-
         # Extract fields from the each of the detailed message types
         # The patterns provided below are included in core of LogStash 1.4.2.
         grok {
@@ -155,7 +100,6 @@ filter {
                         "message", "%{CISCOFW733100}"
                 ]
         }
-
         # Parse the syslog severity and facility
         syslog_pri { }
 
@@ -182,10 +126,6 @@ geoip {
       database => "/etc/logstash/GeoIPASNum.dat"
       source => "src_ip"
     }
-}
-
-output {
-  elasticsearch { host => localhost }
 }
 ```
 
