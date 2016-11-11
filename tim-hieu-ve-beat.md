@@ -150,6 +150,121 @@ logging:
 
 ----
 
+- Đây là file cấu hình của tôi khi config filebeat
+```sh
+root@controller1:/etc/filebeat# cat filebeat.yml |egrep -v "^$|^#|^  #|^    #|^      #|^        #"
+filebeat:
+  prospectors:
+    -
+      paths:
+        - /var/log/neutron/*.log
+      encoding: utf-8
+      input_type: log
+      fields:
+        level: debug
+      document_type: neutron
+  registry_file: /var/lib/filebeat/registry
+output:
+  logstash:
+    hosts: ["172.16.69.90:5044"]
+    worker: 1
+    bulk_max_size: 2048
+    tls:
+      certificate_authorities: ["/etc/pki/tls/certs/logstash-forwarder.crt"]
+shipper:
+  name: ctl_neutron
+  tags: ["neutron"]
+logging:
+  to_syslog: false
+  to_files: true
+  files:
+    path: /var/log/myfilebeat
+    name: myfilebeat
+    rotateeverybytes: 1048576000 # = 1GB
+    keepfiles: 7
+  selectors: ["*"]
+  level: info
+```
+
+- Cấu hình với Packetbeat
+```sh
+root@controller1:/etc/packetbeat# cat packetbeat.yml |egrep -v "^$|^#|^  #|^    #|^      #|^        #"
+interfaces:
+  device: any
+protocols:
+  dns:
+    ports: [53]
+    include_authorities: true
+    include_additionals: true
+  http:
+    ports: [80, 8080, 8000, 5000, 8002, 35357]
+  memcache:
+    ports: [11211]
+  mysql:
+    ports: [3306]
+  pgsql:
+    ports: [5432]
+  redis:
+    ports: [6379]
+  thrift:
+    ports: [9090]
+  mongodb:
+    ports: [27017]
+output:
+  logstash:
+    hosts: ["172.16.69.90:5044"]
+    worker: 1
+    bulk_max_size: 2048
+    tls:
+      certificate_authorities: ["/etc/pki/tls/certs/logstash-forwarder.crt"]
+shipper:
+  name: packetbeat_elkserver1
+  tags: ["packet_elk1"]
+logging:
+  to_syslog: false
+  to_files: true
+  files:
+    path: /var/log/mypacketbeat
+    name: mypacketbeat
+    rotateeverybytes: 1048576000 # = 1GB
+    keepfiles: 7
+  selectors: ["*"]
+  level: info
+```
+
+- Cấu hình với topbeat
+```sh
+root@controller1:/etc/topbeat# cat topbeat.yml |egrep -v "^$|^#|^  #|^    #|^      #|^        #"
+input:
+  period: 10
+  procs: [".*"]
+  stats:
+    system: true
+    process: true
+    filesystem: true
+    cpu_per_core: false
+output:
+  logstash:
+    hosts: ["172.16.69.90:5044"]
+    worker: 1
+    bulk_max_size: 2048
+    tls:
+      certificate_authorities: ["/etc/pki/tls/certs/logstash-forwarder.crt"]
+shipper:
+  name: topbeat
+  tags: ["topneat_elk"]
+logging:
+  to_syslog: false
+  to_files: true
+  files:
+    path: /var/log/mytopbeat
+    name: mytopbeat
+    rotateeverybytes: 1048576000 # = 1GB
+    keepfiles: 7
+  selectors: ["*"]
+  level: info
+```
+
 # Tham khảo
 - [https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04](https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04)
 - [https://www.elastic.co/guide/en/beats/filebeat/current/how-filebeat-works.html](https://www.elastic.co/guide/en/beats/filebeat/current/how-filebeat-works.html)

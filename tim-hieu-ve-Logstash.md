@@ -1,6 +1,6 @@
 ﻿# 1. Logstash là gì?
 
-Logstash là một công cụ mạnh mẽ cho việc tập trung và phân tích log, giúp cho bạn có một cái nhìn về môi trường và hoạt động của server.
+Logstash là một công cụ mạnh mẽ cho việc nhận tập trung và phân tích log, giúp cho bạn có một cái nhìn về môi trường và hoạt động của server.
 
 # 2. Cấu hình
 
@@ -12,10 +12,10 @@ Kiểm tra version logstash:
 logstash 2.3.4
 ```
 
-Việc cấu hình thường được thực hiện là khai báo Grok để matching dữ liệu đầu vào ở file filter. 
+Logstash có nhiều bộ lọc khác nhau, với logs gửi từ filebeat ta sẽ sử dụng grok để phân tích log
 
 Có 2 phần khai báo.
-	**type** được khai báo trước, nó nằm ở 
+	**type** được khai báo trước, nó nằm ở:
 ```sh
 # /opt/logstash/vendor/bundle/jruby/1.9/gems/logstash-patterns-core-2.0.5/patterns
 ```
