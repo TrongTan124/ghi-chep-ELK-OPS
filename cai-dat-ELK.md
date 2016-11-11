@@ -367,6 +367,190 @@ Sử dụng lệnh *curl* để download file về:
 # cd /root/beat
 # curl -L -O https://download.elastic.co/beats/dashboards/beats-dashboards-1.2.2.zip
 ```
+
+Cài đặt unzip package với lệnh sau:
+```sh
+# apt-get -y install unzip
+```
+
+Giải nén file
+```sh
+# unzip beats-dashboards-*.zip
+```
+
+Thực hiện load các sample dashboard, visualization và beat index pattern vào Elasticsearch bằng lệnh sau:
+```sh
+# cd beats-dashboards-*
+# ./load.sh
+```
+
+Có các index pattern sau sẽ được load:
+- packetbeat-*
+- topbeat-*
+- filebeat-*
+- winlobeat-*
+
+Khi bắt đầu sử dụng Kibana, chúng ta sẽ chọn Filebeat index pattern làm mặc định.
+
+Load Filebeat index template in Elasticsearch
+---------------------------------------------
+
+Trong phần này, tôi sử dụng Filebeat để ship log tới Elasticsearch nên chúng ta sẽ load Filebeat index template. 
+Index template sẽ cấu hình Elasticsearch để phân tích các trường trong Filebeat theo cách nhanh hơn.
+
+Đầu tiên tải Filebeat index template về máy
+```sh
+# cd /root/beat
+# curl -O https://gist.githubusercontent.com/thisismitch/3429023e8438cc25b86c/raw/d8c479e2a1adcea8b1fe86570e42abab0f10f364/filebeat-index-template.json
+```
+
+Load template với lệnh sau:
+```sh
+# curl -XPUT 'http://localhost:9200/_template/filebeat?pretty' -d@filebeat-index-template.json
+```
+
+Nếu template được load đúng, sẽ nhìn thấy message sau:
+```sh
+{
+  "acknowledged" : true
+}
+```
+
+Bây giờ ELK server đã sẵn sàng để nhận dữ liệu bằng shipper Filebeat, chúng ta sẽ cài đặt Filebeat lên client server.
+
+Set up Filebeat (trên Client Servers)
+------------------------------------
+
+Trong phần này sẽ cấu hình gửi logs tới Logstash trên ELK server. 
+
+**Copy SSL Certificate**
+
+Trên ELK server, cần copy SSL certificate được tạo ở bước trên tới Client Server, bạn cần thay username và IP tương ứng của client vào:
+```sh
+ELK Server# scp /etc/pki/tls/certs/logstash-forwarder.crt user@client_server_private_address:/tmp
+```
+
+Kiểm tra chắc chắn certificate đã được copy thành công từ ELK Server tới client server. 
+Bây giờ, tại Client Server, copy SSL certificate vào thư mục (*/etc/pki/tls/certs*)
+```sh
+# mkdir -p /etc/pki/tls/certs
+# cp /tmp/logstash-forwarder.crt /etc/pki/tls/certs/
+```
+
+Install Filebeat Package
+------------------------
+
+Trên Client Server, tạo Beats source list:
+```sh
+# echo "deb https://packages.elastic.co/beats/apt stable main" |  sudo tee -a /etc/apt/sources.list.d/beats.list
+```
+
+Nó sử dụng GPG key như Elasticsearch, được cài đặt bằng lệnh sau:
+```sh
+# wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+```
+
+Cài đặt Filebeat package:
+```sh
+# apt-get update -y && apt-get install filebeat -y
+```
+
+Configure Filebeat
+------------------
+
+Bây giờ chúng ta sẽ cấu hình Filebeat để kết nối tới Logstash trên ELK server.
+
+- Backup lại file cấu hình
+```sh
+# cp /etc/filebeat/filebeat.yml /etc/filebeat/filebeat.yml.orgi
+```
+
+Do file cấu hình của Filebeat là định dạng YAML nên các khoảng trắng rất quan trọng. Chắc chắn bạn sử dụng đúng số khoảng trắng.
+
+Phần đầu của file cấu hình bạn sẽ thấy session *prospectors*, bạn cần khai báo prospectors để nó shipper cụ thể từng log file. Mỗi prospectors được chỉ ra bằng ký tự -
+
+Chúng ta sẽ chỉnh sửa prospectors mặc định để gửi syslog và auth.log tới Logstash. Dưới paths, comment dòng sau - /var/log/*.log . Dòng này sẽ cấu hình để Filebeat gửi mọi file .log trong thư 
+mục tới Logstash. Thêm vào 2 mục syslog và auth.log sẽ nhìn thấy file cấu hình như sau:
+```sh
+...
+      paths:
+        - /var/log/auth.log
+        - /var/log/syslog
+       # - /var/log/*.log
+...
+```
+
+Tìm tới dòng *document_type*; bỏ # ở nó và thay đổi nó thành "syslog".
+```sh
+...
+      document_type: syslog
+...
+```
+
+Điều này sẽ chỉ ra prospector có type là syslog (type này liên quan tới file cấu hình filter đã tạo tại ELK server)
+
+Nếu bạn gửi các loại file log khác tới ELK server, bạn có thể tạo ra các prospector vào file cấu hình.
+
+Tiếp theo, dưới output section, tìm dòng elasticsearch và comment nó lại. vì chúng ta sử dụng logstash
+
+Tìm tới logstash trong output session, bỏ comment cho #logstash: và bỏ comment cho #host: thay đổi địa chỉ IP hoặc hostname của ELK server
+```sh
+### Logstash as output
+  logstash:
+    # The Logstash hosts
+    hosts: ["ELK_server_private_IP:5044"]
+```
+
+Filebeat kết nối tới Logstash trên ELK server tại port 5044 đã khai báo ở file input phía trên.
+
+Ngay dưới host, thay đổi giá trị của bulk_max_size thành 1024, vì mặc đinh logs sinh ra từ syslog không bao giờ vượt quá 1024. tham khảo tại [đây](https://github.com/hocchudong/Mot-vai-hieu-biet-ve-log)
+```sh
+bulk_max_size: 1024
+```
+
+Tìm đến tls section, bỏ comment nó và bỏ comment cho dòng certificate_authorities, thay đổi thành giá trị ["/etc/pki/tls/certs/logstash-forwarder.crt"]
+```sh
+...
+    tls:
+      # List of root certificates for HTTPS server verifications
+      certificate_authorities: ["/etc/pki/tls/certs/logstash-forwarder.crt"]
+```
+
+Đã cấu hình thành công, giờ lưu lại và restart Filebeat
+```sh
+# service filebeat restart
+# update-rc.d filebeat defaults
+```
+
+Hiện tại Filebeat đã gửi log của syslog và auth.log tới Logstash trên ELK server. Lặp lại các bước trên với các server cần thu thập logs khác.
+
+Test Filebeat Installation
+--------------------------
+
+Trên ELK server, kiểm tra lại dữ liệu đã nhận từ Filebeat bằng lệnh sau
+```sh
+# curl -XGET 'http://localhost:9200/filebeat-*/_search?pretty'
+```
+
+Nếu nhìn thấy dòng sau là đã có logs gửi về
+```sh
+...
+{
+      "_index" : "filebeat-2016.01.29",
+      "_type" : "log",
+      "_id" : "AVKO98yuaHvsHQLa53HE",
+      "_score" : 1.0,
+      "_source":{"message":"Feb  3 14:34:00 rails sshd[963]: Server listening on :: port 22.","@version":"1","@timestamp":"2016-01-29T19:59:09.145Z","beat":{"hostname":"topbeat-u-03","name":"topbeat-u-03"},"count":1,"fields":null,"input_type":"log","offset":70,"source":"/var/log/auth.log","type":"log","host":"topbeat-u-03"}
+    }
+...
+```
+
+Nếu output là 0 total hits, Elasticsearch vẫn chưa load được logs, cần kiểm tra lại việc cài đặt xem lỗi ở đâu.
+
+Connect to Kibana
+-----------------
+
+
 	
 # Tham khảo
 - [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-elasticsearch-on-ubuntu-14-04](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-elasticsearch-on-ubuntu-14-04)
