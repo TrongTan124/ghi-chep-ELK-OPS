@@ -18,6 +18,11 @@ Windows sử dụng nxlog để gửi log từ Client đến ELK server
 ---------
 ## Filebeat
 
+Check version filebeat
+```sh
+# /usr/bin/filebeat -version
+filebeat version 1.3.1 (amd64)
+```
 
 ---------
 ## Packetbeat
@@ -27,6 +32,25 @@ Check version packetbeat
 # /usr/bin/packetbeat -version
 packetbeat version 1.3.1 (amd64)
 ```
+
+Tham khảo cài đặt packetbeat làm shipper tại [đây](https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-packetbeat-and-elk-on-ubuntu-16-04)
+
+Các shipper có thể hoạt động độc lập với nhau trên cùng một server. 
+
+Currently, Packetbeat supports the following protocols:
+```sh
+ICMP (v4 and v6)
+DNS
+HTTP
+Mysql
+PostgreSQL
+Redis
+Thrift-RPC
+MongoDB
+Memcache
+```
+
+Cách cấu hình packetbeat có thể tham khảo tại [đây](https://www.elastic.co/guide/en/beats/packetbeat/1.3/configuration-protocols.html)
 
 Hạn chế của packetbeat là đang config sẵn các port theo template, mục đích của template dùng để đánh chỉ mục trong Elasticsearch và Kibana.
 
