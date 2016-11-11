@@ -550,7 +550,24 @@ Nếu output là 0 total hits, Elasticsearch vẫn chưa load được logs, c�
 Connect to Kibana
 -----------------
 
+Sau khi hoàn thành cài đặt Filebeat trên tất cả các Server cần thu thập logs, sử dụng Kibana đã cài đặt phía trên để xem log đã được thu thập
 
+Đăng nhập bằng username kibanaadmin, password trong phần gen ở mục trước. bạn sẽ thấy giao diện như sau
+
+![kibana1](/images/kibana1.png)
+
+Chọn Filebeat làm dashboard mặc định.
+
+![kibana2](/images/kibana2.png)
+
+Sau đó click vào tab Discover để xem dữ liệu thu thập được
+
+![kibana3](/images/kibana3.png)
+
+----------------
+
+Toàn bộ quá trình cài đặt thủ công trên sử dụng Filebeat làm shipper cho việc gửi logs từ client về server, có nhiều loại shipper khác nữa, có thể tham khảo thêm tại 
+[đây](https://github.com/TrongTan124/ghi-chep-ELK-OPS/blob/master/tim-hieu-ve-beat.md) 
 	
 # Tham khảo
 - [https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-elasticsearch-on-ubuntu-14-04](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-elasticsearch-on-ubuntu-14-04)
