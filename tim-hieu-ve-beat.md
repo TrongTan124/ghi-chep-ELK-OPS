@@ -18,6 +18,10 @@ Windows sử dụng nxlog để gửi log từ Client đến ELK server
 ---------
 ## Filebeat
 
+Filebeat được tôi thực hiện trong phần cài đặt ELK. phần cấu hình cũng không có gì khó. có thể tham khảo ở phía cuối của trang này.
+
+Quan trọng của Filebeat chính là bộ lọc được cấu hình tại Logstash trên ELK server. tôi sẽ trình bày trong phần Logstash
+
 Check version filebeat
 ```sh
 # /usr/bin/filebeat -version
@@ -26,6 +30,9 @@ filebeat version 1.3.1 (amd64)
 
 ---------
 ## Packetbeat
+
+Phần này chỉ việc cài đặt và chạy, có load sẵn template cho elasticsearch rồi, các shipper gửi dữ liệu về Logstash, không đi qua bộ lọc nào nên được Logstash chuyển thành JSON và push 
+thẳng sang Elasticsearch.
 
 Check version packetbeat
 ```sh
@@ -63,6 +70,8 @@ Tham khảo thêm các cấu hình tại [đây](https://github.com/elastic/beat
 
 Topbeat là một trong các "Beats" data shipper, thực hiện việc gửi các loại dữ liệu các nhau từ Server tới Elasticsearch. Cho phép bạn thu thập thông tin về CPU, memory, process activity.
 
+Topbeat cũng được cấu hình mặc định giống với packetbeat. nghĩa là sẽ load sẵn template cho Elasticsearch để import dữ liệu từ Logstash vào.
+
 **Yêu cầu**:
 - Đã cài đặt ELK
 
@@ -86,32 +95,7 @@ Thực hiện input template vào elasticsearch
 ---------
 ## Winlobeat
 
-
----------
-# 3. Cài đặt, cấu hình
-
-## a. Filebeat
-
-- [Cấu hình filebeat](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-details.html#_level)
-
-## b. Packetbeat
-
-
-## c. Topbeat
-
-Load Kibana Dashboards on ELK Server
-----
-
-Elastic cung cấp vài Kibana dashboard và Beat index pattern có thể sử giúp bạn bắt đầu với Kibana. Nếu không sử dụng dashboard trong bài này, có thể  
-sử dụng Filebeat index pattern.
-
-download the sample dashboards archive to your home directory
-```sh
-# cd ~
-# curl -L -O https://download.elastic.co/beats/dashboards/beats-dashboards-1.1.0.ziphttps://download.elastic.co/beats/dashboards/beats-dashboards-1.1.0.zip
-```
-
-## d. Winlobeat
+Chưa thực hiện cài đặt nên cũng chưa có nhận xét.
 
 # TIP fix bug
 
@@ -134,7 +118,7 @@ Make sure to stop filebeat, remove the registry file and start it again so it st
 ```
 
 
-Trường hợp filebeat để cấu hình mặc định sẽ send log vào file /var/log/syslog. nên sửa dòng cấu hình tại /etc/filebeat/filebeat.yml đoạn sau:
+Trường hợp filebeat để cấu hình mặc định sẽ send mốt số log vào file /var/log/syslog. nên sửa dòng cấu hình tại /etc/filebeat/filebeat.yml đoạn sau:
 ```sh
 logging:
   to_syslog: false
