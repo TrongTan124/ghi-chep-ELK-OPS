@@ -237,6 +237,7 @@ EOF
 
 	# Add port firewall
 	ufw allow 5044
+	ufw reload
 
 	# Create a configuration file to add filter for syslog message
 cat << EOF > /etc/logstash/conf.d/10-syslog-filter.conf

@@ -10,7 +10,7 @@ Các beat index pattern cần được cài đặt trên cả ELK server và cá
 
 - [packetbeat-]YYYY.MM.DD	: thực hiện gửi dữ liệu capture từ các port về server
 - [topbeat-]YYYY.MM.DD	:
-- [filebeat-]YYYY.MM.DD
+- [filebeat-]YYYY.MM.DD	: thực hiện load file, đọc và gửi các dữ liệu mới về server
 - [winlogbeat-]YYYY.MM.DD
 
 Windows sử dụng nxlog để gửi log từ Client đến ELK server
@@ -63,8 +63,25 @@ Tham khảo thêm các cấu hình tại [đây](https://github.com/elastic/beat
 
 Topbeat là một trong các "Beats" data shipper, thực hiện việc gửi các loại dữ liệu các nhau từ Server tới Elasticsearch. Cho phép bạn thu thập thông tin về CPU, memory, process activity.
 
-**Yêu câu**:
+**Yêu cầu**:
 - Đã cài đặt ELK
+
+Link cài đặt tham khảo tại [đây](https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04)
+
+Có một chút thay đổi, do topbeat đã được đổi thành metricbeat nên lúc get file json về, phải dùng lệnh sau:
+```sh
+#curl -O https://raw.githubusercontent.com/elastic/beats/master/metricbeat/metricbeat.template-es2x.json
+```
+
+Thực hiện input template vào elasticsearch
+```sh
+# curl -XPUT 'http://localhost:9200/_template/topcbeat?pretty' -d@metricbeat.template-es2x.json
+
+==>
+{
+  "acknowledged" : true
+}
+```
 
 ---------
 ## Winlobeat
