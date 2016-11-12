@@ -33,6 +33,35 @@ Elasticsearch có độ sẵn sàng cao và engine tìm kiếm phân tán. Mỗi
 Mặc định, một index được tạo với 5 shard và 1 replica với mỗi shard (5/1). Có nhiều kỹ thuật có thể sử dụng, gồm 1/10 (tăng tốc độ tìm kiếm), hay 20/1 (tăng tốc độ 
 đánh chỉ mục, việc tìm kiếm thực hiện trong một shard)
 
+Kiểm tra shard và replica của Elasticsearch
+--------------
+
+Tham khảo tại [đây](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-update-settings.html)
+
+Gõ lệnh:
+```sh
+# curl -X GET localhost:9200/filebeat-*/_settings?pretty
+```
+
+Output
+```sh
+{
+  "filebeat-2016.11.07" : {
+    "settings" : {
+      "index" : {
+        "creation_date" : "1478601945369",
+        "refresh_interval" : "5s",
+        "number_of_shards" : "5",
+        "number_of_replicas" : "1",
+        "uuid" : "p94SMfWVQiu9cNOwOvnfpg",
+        "version" : {
+          "created" : "2040199"
+        }
+      }
+    }
+  }
+```
+
 # Tham khảo
 - [https://github.com/elastic/elasticsearch](https://github.com/elastic/elasticsearch)
 - [https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
