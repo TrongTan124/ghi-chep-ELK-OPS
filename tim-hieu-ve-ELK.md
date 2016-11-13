@@ -92,4 +92,4 @@ Kết quả hiển thị bằng nhiều cách: theo các dạng biểu đồ.
 # Tham khảo
 - [https://www.elastic.co/webinars/introduction-elk-stack](https://www.elastic.co/webinars/introduction-elk-stack)
 - [https://github.com/elastic/elasticsearch](https://github.com/elastic/elasticsearch)
-- []()
+- [http://www.itzgeek.com/tag/kibana](http://www.itzgeek.com/tag/kibana)
