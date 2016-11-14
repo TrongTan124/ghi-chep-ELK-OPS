@@ -77,7 +77,8 @@ thì cần một số thiết lập riêng như sau:
 - Chuyển tiếp dữ liệu từ Redis vào Logstash
 - Cài đặt Redis và Logstash tại một node riêng
 - Cài đặt Elasticsearch trên 02 node và khai báo replica là 2, shard có thể để mặc định là 5 hoặc tăng lên tùy theo nhu cầu
-- Kibana nên cài đặt cùng nginx trên một node riêng để hỗ trợ xác thực user đăng nhập và hiển thị
+- Kibana nên cài đặt cùng nginx trên một node riêng để hỗ trợ xác thực user đăng nhập và hiển thị.
+- Sử dụng IP VIP cho Elasticsearch.
 - Còn yêu cầu nào khác sẽ bổ sung tiếp :)
 
 # 7. Q&A
@@ -86,8 +87,12 @@ thì cần một số thiết lập riêng như sau:
 	- Có nhiều. free hoặc thương mại đều có. splunk, graylog
 	
 - Tại sao ELK lại dùng Elasticsearch mà không phải ứng dụng lưu trữ khác như MonggoDB, solr,...?
-	- ELK giống solr, đều là một search engine, tức là nó hỗ trợ tìm kiếm full keyword. Sử dụng cluster, shard, replica để phân tán dữ liệu và tăng hiệu năng lưu trữ, tìm kiếm.
-	- Tại sao dùng ELK mà ko phải solr thì chưa rõ. Có google ở [đây](http://solr-vs-elasticsearch.com/) :))
+	- Elasticsearch giống solr, đều là một search engine, tức là nó hỗ trợ tìm kiếm full keyword. Sử dụng cluster, shard, replica để phân tán dữ liệu và tăng hiệu năng lưu trữ, tìm kiếm.
+	- Tại sao dùng Elasticsearch mà ko phải solr thì chưa rõ. Có google ở [đây](http://solr-vs-elasticsearch.com/) :))
+
+- Các beats chạy có tiêu tốn tài nguyên hệ thống không/
+	- Beats được viết bằng Golang, là một ngôn ngữ lập trình quản lý bộ nhớ rất tốt, nên lượng tài nguyên dành cho beats hoàn toàn ko đáng kể. Nhưng nếu chạy packetbeat mà lượng 
+	packet capture cao thì cũng cần kiểm tra lại. :)
 	
 - Có câu hỏi nào bạn cứ post để cùng tìm câu trả lời. :)
 
