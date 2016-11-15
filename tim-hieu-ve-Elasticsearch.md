@@ -62,6 +62,16 @@ Output
   }
 ```
 
+# 5. Thiết lập cấu hình nâng cao
+
+**Cấu hình Elasticsearch cluster**
+
+link tham khảo tại [đây](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-production-elasticsearch-cluster-on-ubuntu-14-04)
+
+hoặc tại [đây](https://blog.liip.ch/archive/2013/07/19/on-elasticsearch-performance.html)
+
+
+
 # Tham khảo
 - [https://github.com/elastic/elasticsearch](https://github.com/elastic/elasticsearch)
 - [https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)

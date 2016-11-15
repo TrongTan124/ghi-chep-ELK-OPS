@@ -76,9 +76,10 @@ thì cần một số thiết lập riêng như sau:
 - Sử dụng Redis để nhận dữ liệu từ các beats
 - Chuyển tiếp dữ liệu từ Redis vào Logstash
 - Cài đặt Redis và Logstash tại một node riêng
-- Cài đặt Elasticsearch trên 02 node và khai báo replica là 2, shard có thể để mặc định là 5 hoặc tăng lên tùy theo nhu cầu
+- Cài đặt Elasticsearch trên 02 node và khai báo replica là 1, shard có thể để mặc định là 5 hoặc tăng lên tùy theo nhu cầu
 - Kibana nên cài đặt cùng nginx trên một node riêng để hỗ trợ xác thực user đăng nhập và hiển thị.
 - Sử dụng IP VIP cho Elasticsearch.
+- Optimized Elasticsearch để tăng hiệu năng: limit open file, heap size process, read write disk (xài SSD và đặt raid0 để truy vấn), memmory (cache, calculate index file)
 - Còn yêu cầu nào khác sẽ bổ sung tiếp :)
 
 # 7. Q&A
