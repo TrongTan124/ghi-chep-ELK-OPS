@@ -13,7 +13,50 @@ Có thể ví Elasticsearch như một bộ não của ELK stack. Một bộ nã
 
 Các phần tiếp theo tôi sẽ dựa vào ebook "ElasticSearch Cookbook" để trình bày
 
-# 1. 
+# 1. Giới thiệu
+
+Mỗi instance của Elasticsearch được gọi là một node, vài node nhóm lại thành một cluster. Instance có thể là physical server hoặc virtual server.
+
+Khi một node khởi động, nó sẽ có một số action sau:
+- đọc file cấu hình elasticsearch.yml
+- Nếu node chưa có tên nó sẽ chọn ngẫu nhiên 1 tên
+- Elasticsearch khởi động các module và plugin có sẵn trong cài đặt của nó.
+
+Sau khi một node khởi động, nó sẽ tìm kiếm các thành viên khác trong cluster để kiểm tra trạng thái index và shard.
+
+Để 2 node hoặc nhiều hơn được đặt trong 1 cluster, nó phải thỏa mãn vài rule sau:
+- phiên bản elasticsearch phải giống nhau
+- tên cluster phải giống nhau
+- mạng phải cấu hình hỗ trợ broadcast discovery và chúng có thể kết nối với nhau
+
+Thông thường, quản lý một cluster sẽ là master node, có nhiệm vụ chỉ dẫn hành động cho tất cả các node khác, được gọi là secondary node thực hiện nhân bản dữ liệu.
+
+Để phù hợp với hành động write, tất cả các update phải được ghi nhận đầu tiên trên master node sau đó mới nhân bản ra secondary node.
+
+Trong một cluster có nhiều node, nếu master node bị die thì một master-eligible node được bầu chọn để làm master node mới. Phương pháp này cho phép tự động failover (chịu lỗi) 
+cho một elasticsearch cluster.
+
+Có 2 chế độ quan trọng trong một Elasticsearch node: non-data node (arbiter) và data container
+- Non-data node xử lý các REST và các hành động khác của tìm kiếm. Trong quá trình xử lý: non-data node chịu trách nhiệm phân tán action tới các shard (map) và tổng hợp kết quả từ shard 
+(redux) để có thể gửi một phản hồi cuối cùng. Chúng yêu cầu một lượng RAM lớn để: chia tách, gom gộp, thu thập kết quả, lưu bộ nhớ tạm.
+- Data node lưu trữ dữ liệu trong chúng, chúng chứa các shard có nhiệm vụ lưu trữ các chỉ mục văn bản.
+
+Trong cấu hình mặc định, một node gồm cả 2 chế độ arbiter và data container.
+
+Với kiến trúc lớn, sẽ có vài node làm arbiter có rất nhiều RAM, không có dữ liệu, giảm lượng tài nguyên yêu cầu cho data node, tăng hiệu năng cho việc tìm kiếm khi sử dụng bộ nhớ tạm 
+cục bộ của arbiter.
+
+Khi một node chạy, có rất nhiều service được quản lý bởi chính instance. Các service này cung cấp thêm tính năng cho node như networking, indexing, analyzing
+
+Elasticsearch cung cấp một tập các chức năng có thể mở rộng bằng việc thêm các plugin. Trong quá trình một node khởi động, rất nhiều service yêu cầu được tự động chạy:
+- Cluster service: Quản lý trạng thái cluster, kết nối nội bộ node, đồng bộ
+- Indexing service: Quản lý tất cả hành động indexing, khởi tạo các active indice và shard.
+- Mapping service: Quản lý các loại document được lưu trong cluster
+- Network server: Có các servic như HTTP REST (port 9200), internal ES protocol (port 9300)
+- Plugin Service: Tăng cường các chức năng cơ bản của Elasticsearch
+- River service: service chạy trong một cluster, kéo dữ liệu hoặc đẩy dữ liệu.
+- Language Scripting Service: Cho phép thêm ngôn ngữ script hỗ trợ Elasticsearch
+
 
 
 

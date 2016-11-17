@@ -70,7 +70,29 @@ link tham khảo tại [đây](https://www.digitalocean.com/community/tutorials/
 
 hoặc tại [đây](https://blog.liip.ch/archive/2013/07/19/on-elasticsearch-performance.html)
 
+# 6. Plugin
 
+Có một số plugin rất tiện dụng khi làm việc với Elasticsearch:
+
+- [elasticsearach-head](https://github.com/mobz/elasticsearch-head)
+
+Cài đặt bằng lệnh sau: 
+```sh
+# cd /usr/share
+# elasticsearch/bin/plugin install mobz/elasticsearch-head
+```
+
+Link đăng nhập tại: http://IP_Elasticsearch:9200/_plugin/head/
+
+- Thêm plugin [elasticsearch-HQ](https://github.com/royrusso/elasticsearch-HQ)
+
+Cài đặt:
+```sh
+# cd /usr/share
+# elasticsearch/bin/plugin install royrusso/elasticsearch-HQ
+```
+
+Link đăng nhập tại: http://IP_Elasticsearch:9200/_plugin/hq/
 
 # Tham khảo
 - [https://github.com/elastic/elasticsearch](https://github.com/elastic/elasticsearch)
