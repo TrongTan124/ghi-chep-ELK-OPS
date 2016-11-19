@@ -64,6 +64,9 @@ function install_prepare {
 		dpkg -i crudini_0.7-1_i386.deb
 	fi
 
+	echocolor "Cai dat sshpass"
+	apt-get install sshpass
+
 	echocolor "Cai dat JAVA 8 de chay ELK stack"
 	sleep 3
 
@@ -223,7 +226,7 @@ function install_logstash {
 			break
 
 		else
-			echocolor "Neu ban chon cai dat ssh, ban phai chon ip_address hoac fqdn_dns. Ban hay dien lai option se cai dat."
+			echocolor "Neu ban chon cai dat ssh, ban phai chon ip_address hoac fqdn_dns. Ban hay dien lai option de tiep tuc cai dat."
 			read input_option
 			SSL_OPTION=$input_option
 			SSL_BOOLEAN=true
@@ -333,7 +336,6 @@ function config_index_packetbeat {
 function send_ssl_to_client {
 	# Gui ssl_certificate tu ELK server toi client.
 	echocolor "Gui ssl tu ELK server sang client"
-	apt-get install sshpass
 
 	sshpass -p $PASSWD_CLIENT1 scp -o "StrictHostKeyChecking no" /etc/pki/tls/certs/logstash-forwarder.crt $USERNAME_CLIENT1@$IP_ELK_CLIENT1:/tmp/
 }

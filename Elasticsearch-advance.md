@@ -57,7 +57,9 @@ Elasticsearch cung cấp một tập các chức năng có thể mở rộng b�
 - River service: service chạy trong một cluster, kéo dữ liệu hoặc đẩy dữ liệu.
 - Language Scripting Service: Cho phép thêm ngôn ngữ script hỗ trợ Elasticsearch
 
-
+Mối tương quan giữa Elasticsearch và Relational DB
+- Relational DB ==> Databases ==> Tables ==> Rows      ==> Columns
+- Elasticsearch ==> Indices   ==> Types  ==> Documents ==> Fields
 
 
 
