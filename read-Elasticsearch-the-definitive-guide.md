@@ -14,6 +14,7 @@ An empty cluster
 Khi cài đặt xong một single node mà không có data, không có indicex, cluster sẽ như sau:
 
 ![read-defi-single-node](/images/read-defi-single-node.png)
+
 A cluster with one empty node
 
 Một cluster sẽ bầu chọn một node thành master node, nó có nhiệm vụ quản lý việc tạo và xóa index, hay thêm vào hoặc xóa bỏ một node trong cluster.
@@ -58,6 +59,7 @@ phần cứng bạn có, kích cỡ và độ phức tạp của document, cách
 Một replica là một bản sao của primary shard. Replica được sử dụng để cung cấp một bản sao dữ liệu dự phòng trong trường hợp phần cứng lỗi hoặc phục vụ truy vấn tìm kiếm.
 
 ![read-defi-single-node-an-index](/images/read-defi-single-node-an-index.png)
+
 A single-node cluster with an index
 
 Add Failover
@@ -67,6 +69,7 @@ Khi thêm second node và một cluster, nó phải có cùng tên cluster.name 
 log để tìm lỗi: có thể do multicast bị disable trong network hoặc firewall chặn kết nối. do version java và elasticsearch khác nhau.
 
 ![read-defi-two-node](/images/read-defi-two-node.png)
+
 A two-node cluster - all primary and replica shards are allocated
 
 Scale horizontally
@@ -75,6 +78,7 @@ Scale horizontally
 Chuyện gì xảy ra khi tiếp tục mở rộng cluster? Nếu thêm third node thì cluster sẽ tổ chức lại như sau:
 
 ![read-defi-third-node](/images/read-defi-third-node.png)
+
 A three-node cluster - shards have been reallocated to spread the load
 
 Một shard ở node 1 và node 2 sẽ di chuyển sang node 3, chúng ta sẽ có 2 shard trên một node thay vì 3 shard như trước kia. Nghĩa là tài nguyên phần cứng (CPU, RAM, I/O) trên mỗi node 
@@ -92,6 +96,7 @@ số lượng primary shard đã được cố định khi index được tạo.
 Hình dưới mô tả lại một index có 9 shard: 3 primary và 6 replica. Điều này cho phép chúng ta mở rộng ra tới 9 node, một shard trên một node.
 
 ![read-defi-third-node-2-replica](/images/read-defi-third-node-2-replica.png)
+
 Increasing the number_of_replicas to 2
 
 Copy with Failure
@@ -100,6 +105,7 @@ Copy with Failure
 Chúng ta đã nói Elasticsearch có thể đối phó với trường hợp node lỗi. Giờ chúng ta thử thực hiện điều đó, nếu ta kill first node, cluster sẽ như sau:
 
 ![read-defi-third-node-2-replica-kill-1-node](/images/read-defi-third-node-2-replica-kill-1-node.png)
+
 Cluster after killing one node
 
 Node bị kill là master node. Một cluster luôn phải có một master node. Việc đầu tiên xảy ra đó là việc bầu chọn một master node mới: node 2
@@ -111,7 +117,8 @@ thành primary, chuyển cluster health thành yellow. Hành động nâng cấp
 
 # Chapter 3: Data In, Data Out
 
-
+Trong chương này, chúng ta xem xét các API được sử dụng để create, retrieve, update, và delete documents. Chúng ta không quan tâm tới dữ liệu bên trong document hay cách truy vấn chúng. 
+Chúng ta quan tâm cách lưu trữ document tin cậy trong Elasticsearch và cách chúng trả về.
 
 
 
