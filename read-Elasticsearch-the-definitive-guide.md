@@ -149,9 +149,125 @@ index name phải là chữ thường, không được bắt đầu với gạch
 _type
 ----
 
+Trong application, chúng ta sử dụng object để miêu tả mọi thứ như một user, một blog post, một comment hay một email. mỗi object thuộc về một class đã định nghĩa thuộc tính cho object. 
+Object trong user class có thể có tên, giới tính, tuổi, địa chỉ email.
+
+Trong relational database chúng ta thường lưu các object của cùng class trong cùng một bảng bởi vì chúng sử dụng cấu trúc giống nhau. Tương tự, Elasticsearch sử dụng cùng type của document 
+để miêu tả các thứ trong cùng class.
+
+Mọi type đều có mapping riêng hoặc schema, thứ mà định nghĩa cấu trúc dữ liệu cho document của type đó, giống với cột trong bảng của một database. Document của tất cả các type có thể 
+được lưu trữ trong cùng index, nhưng mapping của type nói với Elasticsearch cách dữ liệu trong mỗi document được đánh chỉ mục.
+
+_Id
+----
+
+ID là một string kết hợp với index và type để định danh duy nhất một document trong Elasticsearch. Khi tạo một document mới, bạn có thể cung cấp 
+id riêng hoặc Elasticsearch sinh ra một ID cho bạn.
+
+Indexing a Document
+----
+
+Các document được đánh chỉ mục - lưu trữ và tìm kiếm - bằng cách sửa dụng index API. nhưng đầu tiên, chúng ta cần xác định nơi document lưu trú. Như đã nói, _index, _type, _id của document 
+xác định duy nhất document. Chúng ta cũng có thể cung cấp _id riêng hoặc cho phép index API tự sinh ra.
+
+**Using our own ID**
+
+Mọi document đều có số version. mọi thay đổi tác động lên document đều làm số version tăng lên (bảo gồm cả delete). 
+
+**autogenerating ID**
+
+autogenerating ID dài 22 ký tự, URL-safe, base64-encoded or UUIDs.
+
+Retrieving a Document
+----
+
+Phản hồi cho GET request bao gồm {"found": true}, xác nhận là document đã được tìm thấy.
+
+# Chapter 4: Distributed document store
+
+Trong chương này, chúng ta sẽ đi sâu vào các liên kết nội tại, chi tiết kỹ thuật để giúp bạn hiểu về cách dữ liệu được lưu trữ trong hệ thống phân tán.
+
+Routing a document to a shard
+----
+
+Khi bạn đánh chỉ mục một document, nó được lưu vào primary shard. Làm thế nào mà Elasticsearch biết document thuộc về shard nào? Khi chúng ta tạo một document mới, làm cách nào mà 
+Elasticsearch biết document đó nên lưu tại shard 1 hay shard 2? 
+
+Việc xử lý không thể ngẫu nhiên, vì chúng ta còn cần truy vấn trong tương lai. Nó xác định theo một công thức đơn gian:
+```sh
+shard = hash(routing) % number_of_primary_shards
+```
+
+Routing có thể là một chuỗi tùy ý, mặc định là _id của document, nhưng có thể thiết lập giá trị cho nó. Chuỗi routing thông qua hàm hashing để sinh ra một số, số này được chia cho 
+số primary shard trong index để thành remainder. Remainder sẽ luôn nằm trong khoảng từ 0 tới number_of_primary_shards - 1 và giúp ta xác định shard lưu trữ document.
+
+Điều này giải thích tại sao số lượng primary shard có thể được thiết lập chỉ khi một index được tạo và không bao giờ thay đổi: nếu số lượng primary shards thay đổi trong tương lai, 
+tất cả các giá trị routing trước đó sẽ mất giá trị và document không bao giờ được tìm thấy.
+
+**Note** Có cách để thay đổi primary shard, nhưng sẽ bàn luận tại chương 43. Giá trị routing được thiết lập tùy biến để giúp người dùng lưu trữ các document liên quan nhau được 
+lưu tại cùng shard.
+
+How primary and replica shards interact
+----
+
+Để giải thích rõ ràng, chúng ta sử dụng hình dưới, một cluster có 3 node chứa 1 index là blog và có 2 primary shard. mỗi primary shard có 02 replica. Các bản sao chép giống nhau 
+thì không bao giờ được đặt trên cùng node.
+
+![read-defi-chapter4-1](/images/read-defi-chapter4-1.png)
+
+A cluster with three nodes and one index
+
+Chúng ta có thể gửi request tới mọi node trong cluster. Mọi node đều có khả năng nhận các request. Mọi node đều biết vị trí của mọi document trong cluster và có thể chuyển tiếp 
+request tới node yêu cầu. Ví dụ gửi request tới Node 1, chúng ta quy định cho nó như một requesting node.
+
+Creating, Indexing, and Deleting a Document
+----
+
+Các request create, index và delete là các hành động write, chúng phải được hoàn thành trên primary shard trước khi sao chép sang replica shard liên quan.
+
+![read-defi-chapter4-2](/images/read-defi-chapter4-2.png)
+
+Creating, indexing, and deleting a single document
+
+Dưới đây là chuỗi các bước cần thiết để create, index, và delete document thành công trên cả primary và mọi replica shard.
+1. Client gửi request create, index, delete tới Node 1
+2. node sử dụng _id của document để xác định document thuộc về shard 0. Nó chuyển tiếp yêu cầu tới Node 3, nơi mà primary shard 0 được xác định.
+3. Node 3 thực hiện request trên primary shard. Nếu thành công nó chuyển tiếp yêu cầu một cách song song tới replica trên node 1 và node 2. Khi tất cả các replica shard báo thành công, 
+Node 3 phản hồi thành công cho requesting node để báo thành công cho client.
+
+Khi client nhận phản hồi thành công, các thay đổi của document đã được thực thi trên tất cả primary và replica shard. Thay đổi được an toàn.
+
+Có một số tùy chọn các tham số request cho phép bạn tác động vào quá trình xử lý trên, mục đích tăng hiệu năng và an toàn dữ liệu. Các tùy chọn này hiếm khi được sử dụng trong Elasticsearch,
+bởi vì Elasticsearch rất nhanh. Nhưng chúng ta sẽ trình bày ở đây cho đầy đủ.
+- replication: giá trị mặc định của replication là sync, nghĩa là primary shard đợi phản hồi thành công của tất cả replica shard trước khi trả về phản hồi. Nếu replication là async thì 
+nó sẽ trả về thành công cho client ngay khi thực thi xong trên primary shard. Nó vẫn chuyển tiếp request cho replica nhưng sẽ không biết được replica có thành công hay ko.
+- consistency: Mặc định, primary shard yêu cầu một quorum, hay majority của các bản sao chép shard (ở đây, shard copy có thể là primary hoặc replica shard) sẵn sàng trước khi thực hiện 
+hành động write. Điều này tránh ghi dữ liệu vào "wrong side" của một network cụ thể. Quorum được tính như sau
+```sh
+int( (primary + number_of_replicas) / 2 ) + 1
+```
+- timeout: Chuyện gì xảy ra nếu không đủ shard? Elasticsearch sẽ đợi và hy vọng shard đó xuất hiện. Mặc định nó sẽ đợi 1 phút.
+
+Retrieving a Document
+----
+
+Một document có thể được nhận từ một primary shard hoặc từ mọi replica của nó.
+
+![read-defi-chapter4-3](/images/read-defi-chapter4-3.png)
+
+Retrieving a single document
+
+ở đây là chuỗi các bước để nhận một document từ cả primary và replica shard:
+1. Client gửi get request tới Node 1
+2. Node sử dụng _id của document để xác định, và biết document thuộc shard 0. Sao chép của shard 0 tồn tại trên cả 03 node. Tại thời điểm này, nó chuyển tiếp yêu cầu sang node 2.
+3. node 2 trả về document cho node 1, node 1 sử dụng kết quả trả về cho client
+
+Khi đọc request, requesting node sẽ chọn các bản sao chép khác nhau của shard theo thuật toán cân bằng. nó sẽ xoay vòng thông qua tất cả các bản copy shard.
+
+Partial Updates to a Document
+----
 
 
-/
 
 # Tài liệu tham khảo
 
