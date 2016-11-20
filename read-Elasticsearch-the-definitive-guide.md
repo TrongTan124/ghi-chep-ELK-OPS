@@ -267,6 +267,11 @@ Khi đọc request, requesting node sẽ chọn các bản sao chép khác nhau 
 Partial Updates to a Document
 ----
 
+**Chưa có time **
+
+
+# Chapter 5: Searching - The Basic Tools
+
 
 
 # Tài liệu tham khảo
