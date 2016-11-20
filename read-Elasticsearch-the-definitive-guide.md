@@ -120,9 +120,38 @@ thành primary, chuyển cluster health thành yellow. Hành động nâng cấp
 Trong chương này, chúng ta xem xét các API được sử dụng để create, retrieve, update, và delete documents. Chúng ta không quan tâm tới dữ liệu bên trong document hay cách truy vấn chúng. 
 Chúng ta quan tâm cách lưu trữ document tin cậy trong Elasticsearch và cách chúng trả về.
 
+Phần này nói nhiều về JSON nên tôi chỉ note lại một vài ý cần nhớ, nếu bạn làm lập trình thì nên đọc kỹ để thao tác dữ liệu tốt hơn.
+
+What is a Document?
+----
+
+Thông thường, chúng ta sử dụng thuật ngữ object và document giống nhau. Tuy nhiên, có một khác biệt. Một object chỉ là một JSON object - tương tự như những gì bạn đã biết về hash, 
+hashmap, dictionary, hay liên kết array. Object có thể chứa các object khác. Trong Elasticsearch, thuật ngữ document có ý nghĩa cụ thể hơn. Nó chỉ tới top-level hay root object, những 
+thứ được đưa vào trong JSON và lưu trữ trong Elasticsearch với một unique ID.
+
+Document Metadata
+----
+
+Một document không chỉ chứa dữ liệu của chính nó. Nó còn có metadata - thông tin về document. Có 3 metadata được nói tới:
+- index: Nơi mà document lưu trú
+- type: lớp của object mà document được miêu tả
+- id: định danh duy nhất của một document
+
+_index
+----
+
+Một index như một database trong relational database; nó là nơi chúng ta lưu trữ và đánh chỉ mục dữ liệu.
+
+**note**: trong Elasticsearch, dữ liệu được lưu trữ và đánh chỉ mục trong các shard, trong khi một index đơn giản chỉ là một logical namespace nhóm một hoặc nhiều shard lại với nhau.
+
+index name phải là chữ thường, không được bắt đầu với gạch dưới, không được chứa dấu phẩy
+
+_type
+----
 
 
 
+/
 
 # Tài liệu tham khảo
 
