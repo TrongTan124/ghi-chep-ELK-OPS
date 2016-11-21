@@ -230,6 +230,7 @@ Các request create, index và delete là các hành động write, chúng phả
 Creating, indexing, and deleting a single document
 
 Dưới đây là chuỗi các bước cần thiết để create, index, và delete document thành công trên cả primary và mọi replica shard.
+
 1. Client gửi request create, index, delete tới Node 1
 2. node sử dụng _id của document để xác định document thuộc về shard 0. Nó chuyển tiếp yêu cầu tới Node 3, nơi mà primary shard 0 được xác định.
 3. Node 3 thực hiện request trên primary shard. Nếu thành công nó chuyển tiếp yêu cầu một cách song song tới replica trên node 1 và node 2. Khi tất cả các replica shard báo thành công, 
@@ -258,6 +259,7 @@ Một document có thể được nhận từ một primary shard hoặc từ m�
 Retrieving a single document
 
 ở đây là chuỗi các bước để nhận một document từ cả primary và replica shard:
+
 1. Client gửi get request tới Node 1
 2. Node sử dụng _id của document để xác định, và biết document thuộc shard 0. Sao chép của shard 0 tồn tại trên cả 03 node. Tại thời điểm này, nó chuyển tiếp yêu cầu sang node 2.
 3. node 2 trả về document cho node 1, node 1 sử dụng kết quả trả về cho client
