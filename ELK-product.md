@@ -11,7 +11,7 @@ Trong phần này tôi sẽ thực hiện triển khai ELK ở mức product. T�
 
 Yêu cầu:
 
-- Tối thiểu 03 server (vật lý hoặc ảo)
+- Tối thiểu 02 server (vật lý hoặc ảo)
 - Tối thiểu 4GB RAM
 - HDD tùy thuộc nhu cầu lưu trữ
 - Hệ điều hành ubuntu 14.04 64bit (đây là mô hình thử nghiệm của tôi)
@@ -38,6 +38,10 @@ Java HotSpot(TM) 64-Bit Server VM (build 25.111-b14, mixed mode)
 ```sh
 # apt-get install keepalived -y
 ```
+
+	c. Cài đặt incron để đồng bộ cấu hình
+	
+	
 
 3. Cài đặt Elasticsearch
 
@@ -154,6 +158,61 @@ dữ liệu của toàn bộ cluster.
 2. Thực hiện cấu hình Kibana, Nginx
 ----
 
+- Phần cấu hình kibana và nginx ko có gì đặc biệt, tham khảo ở phần cài đặt all in one
+
+3. Cấu hình Logstash
+----
+
+- Thực hiện tạo input
+
+- Thực hiện tạo output
+
+- Thực hiện tạo filter
+	- Phần này sử dụng các pattern có sẵn hoặc tự defined theo dữ liệu
+	- sử dụng regular expression tạo các pattern
+	- Chỉ định đường dẫn cho các pattern vừa khai báo trong file filter
+	
+4. Cấu hình keepalived
+----
+
+Phần này khá quan trọng, HA được hay không là do phần này.
+
+Tham khảo tại phần tìm hiểu về keepalived.
+
+**Nguyên lý**: Tạo IP VIP cho kết nối các beat tới ELK, cấu hình để IP VIP cố định trên node, chỉ chuyển IP VIP khi service hoặc kết nối mạng có vấn đề. 
+Và sau khi chuyển xong, dù node master có up thì IP VIP cũng ko chuyển ngược lại.
+Thêm nữa là phải viết script check status và đưa ra action phù hợp.
+
+5. Cấu hình rsync các file config
+----
+
+Cần cấu hình incron để phù hợp với yêu cầu. Tham khảo tại [đây](https://www.cyberciti.biz/faq/linux-inotify-examples-to-replicate-directories/)
+
+Cho phép incron khởi động cùng hđh
+
+Sử dụng incrontab để khai báo, sử dụng incrontab -e
+```sh
+/etc/logstash/conf.d/ IN_CREATE,IN_DELETE,IN_CLOSE_WRITE /usr/bin/rsync -a --delete /etc/logstash/conf.d/ root@172.16.69.93:/etc/logstash/conf.d/
+/etc/pki/tls/certs/ IN_CREATE,IN_DELETE,IN_CLOSE_WRITE /usr/bin/rsync -a --delete /etc/pki/tls/certs/ root@172.16.69.93:/etc/pki/tls/certs/
+/etc/pki/tls/private/ IN_CREATE,IN_DELETE,IN_CLOSE_WRITE /usr/bin/rsync -a --delete /etc/pki/tls/private/ root@172.16.69.93:/etc/pki/tls/private/
+/etc/nginx/htpasswd.users IN_MODIFY,IN_CLOSE_WRITE /usr/bin/scp /etc/nginx/htpasswd.users root@172.16.69.93:/etc/nginx/
+```
+
+# Lưu ý
+
+- Cần mở port cho các service nếu có dùng firewall của hệ điều hành
+
+- cần cho phép IP VIP bind dịch vụ
+```sh
+We need to allow an interface to be brought online that is not part of the /etc/network/interfaces configuration so we need to run the following. This will allow all of our VIP’s to come up.
+
+# echo "net.ipv4.ip_nonlocal_bind=1" >> /etc/sysctl.conf
+Verify that the above setting has been set by running the following on each node. You should get back the following ‘net.ipv4.ip_nonlocal_bind = 1‘
+
+# sysctl -p
+```
+
 # Tham khảo
 
 - My experience
+- [https://www.elastic.co/guide/en/logstash/current/deploying-and-scaling.html](https://www.elastic.co/guide/en/logstash/current/deploying-and-scaling.html)
