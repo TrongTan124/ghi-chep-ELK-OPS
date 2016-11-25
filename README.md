@@ -3,7 +3,7 @@
 
 *Có thể những ghi chép này được cóp nhặt vụn vặt từ nhiều nguồn, tôi sẽ để lại link gốc những nguồn mà tôi tham khảo.*
 
-ELK là một ứng dụng được tạo nên bằng cách kết hợp các thành phần xử lý khác nhau:
+ELK là một ứng dụng được tạo lên bằng cách kết hợp các thành phần xử lý khác nhau:
 - Elasticsearch: lưu trữ và đánh chỉ mục dữ liệu
 - Logstash: Tập trung và phân tích Log
 - Kibana: Hiển thị truy vấn
