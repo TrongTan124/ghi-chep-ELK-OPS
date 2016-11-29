@@ -18,6 +18,9 @@ function install_keepalived {
 	sleep 3
 
 	apt-get install keepalived -y
+}
+
+function config_keepalived {
 	keepalivedfile=/etc/keepalived/keepalived.conf
 	test -f $keepalivedfile.orgi || cp $keepalivedfile $keepalivedfile.orgi
 
@@ -25,23 +28,77 @@ function install_keepalived {
 	cat << 'EOF' > $keepalivedfile
 	##! Configuration File for keepalived
 
+	vrrp_script chk_service {
+    script /root/scripts/check-service.sh
+    interval 2
+#	weight 2
+	fall 2
+	rise 2
+	}
+
 	vrrp_instance VI_1 {
-	    state MASTER
+	    state BACKUP
 	    interface eth0
 	    virtual_router_id 51
-	    priority 150
+	    priority 99
 	    advert_int 1
+	nopreempt
 	    authentication {
 	        auth_type PASS
-	        auth_pass $ place secure password here.
+	        auth_pass tan124
 	    }
 	    virtual_ipaddress {
-	        10.32.75.200
+	        172.16.69.94
 	    }
+	  track_script {
+	    chk_service
+	  }
+	notify /root/scripts/keepalived.state.sh
 	}
 EOF
-	
 
+	mkdir -p /root/scripts/
+	cd /root/scripts/
+	cat << EOF > check-service.sh
+	#!/bin/bash
+
+	function get_ip {
+		ip_eth0=`/sbin/ifconfig eth0 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}'`
+	        echo $ip_eth0
+	}
+
+	# check telnet port, if success return 0, if false return 1
+	function check_telnet {
+		local ip port
+		ip=$1
+		port=$2
+		result=`nc -z -w2 $ip $port`
+		if [ $? == 0 ]; then
+			echo 0
+		else
+			echo 1
+		fi
+	}
+
+	port_logstash=5044
+	port_elasticsearch=9200
+	ip_eth0=`get_ip`
+	if [[ `check_telnet $ip_eth0 $port_logstash` == 0 && `check_telnet $ip_eth0 $port_elasticsearch` == 0 ]]; then
+		exit 0
+	else
+		exit 1
+	fi
+EOF
+
+	cat <<EOF > keepalived.state.sh 
+	#!/bin/bash
+
+	TYPE=$1
+	NAME=$2
+	STATE=$3
+
+	echo $STATE > /var/run/keepalived.state
+EOF
 }
 
 function install_prepare {
