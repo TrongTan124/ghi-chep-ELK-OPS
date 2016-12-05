@@ -97,6 +97,8 @@ thì cần một số thiết lập riêng như sau:
 	
 - Có câu hỏi nào bạn cứ post để cùng tìm câu trả lời. :)
 
+- Rất mong được học hỏi từ tất cả mọi người.
+
 ----
 Mọi ý kiến đóng góp có thể phản hồi theo địa chỉ sau:
 - Skype: crazyman12487
