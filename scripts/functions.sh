@@ -5,6 +5,7 @@ function echocolor {
 	echo -e "\e[1;33m ########## $1 ########## \e[0m"
 }
 
+# Ham update va upgrade he thong
 function check_update {
 	# cap nhat he thong
 	echocolor "Kiem tra va cap nhat he dieu hanh"
@@ -13,6 +14,7 @@ function check_update {
 	apt-get update -y && apt-get upgrade -y && apt-get dist-upgrade -y
 }
 
+# Ham cai dat keepalived
 function install_keepalived {
 	echocolor "Cai dat, cau hinh IP VIP"
 	sleep 3
@@ -20,16 +22,23 @@ function install_keepalived {
 	apt-get install keepalived -y
 }
 
+# Ham cau hinh keepalived
 function config_keepalived {
 	keepalivedfile=/etc/keepalived/keepalived.conf
 	test -f $keepalivedfile.orgi || cp $keepalivedfile $keepalivedfile.orgi
-
+	local number=$1
+	pri=`expr $number + 99`
+	if [ $number = 1 ]; then
+		state=BACKUP
+	else
+		state=MASTER
+	fi
 	rm -rf $keepalivedfile
-	cat << 'EOF' > $keepalivedfile
+	cat << EOF > $keepalivedfile
 	##! Configuration File for keepalived
 
 	vrrp_script chk_service {
-    script /root/scripts/check-service.sh
+    script /opt/scripts/check-service.sh
     interval 2
 #	weight 2
 	fall 2
@@ -37,28 +46,28 @@ function config_keepalived {
 	}
 
 	vrrp_instance VI_1 {
-	    state BACKUP
+	    state $state
 	    interface eth0
 	    virtual_router_id 51
-	    priority 99
+	    priority $pri
 	    advert_int 1
-	nopreempt
+		nopreempt
 	    authentication {
 	        auth_type PASS
 	        auth_pass tan124
 	    }
 	    virtual_ipaddress {
-	        172.16.69.94
+	        $IP_VIP_ELK
 	    }
 	  track_script {
 	    chk_service
 	  }
-	notify /root/scripts/keepalived.state.sh
+	notify /opt/scripts/keepalived.state.sh
 	}
 EOF
 
-	mkdir -p /root/scripts/
-	cd /root/scripts/
+	mkdir -p /opt/scripts/
+	cd /opt/scripts/
 	cat << EOF > check-service.sh
 	#!/bin/bash
 
@@ -90,7 +99,7 @@ EOF
 	fi
 EOF
 
-	cat <<EOF > keepalived.state.sh 
+	cat << EOF > keepalived.state.sh 
 	#!/bin/bash
 
 	TYPE=$1
@@ -158,12 +167,15 @@ function install_elasticsearch {
 	echocolor "Chinh sua cau hinh Elasticsearch"
 	sleep 3
 
+	local number=$1
 	elasticsearchfile=/etc/elasticsearch/elasticsearch.yml
 	test -f $elasticsearchfile.orgi || cp $elasticsearchfile $elasticsearchfile.orgi		# backup lai file config
 
 	sed -i 's/# network.host: 192.168.0.1/network.host: localhost/g' $elasticsearchfile
-	sed -i 's/# node.name: node-1/node.name: "node1"/g' $elasticsearchfile
+	sed -i "s/# node.name: node-1/node.name: "node-$number"/g" $elasticsearchfile
 	sed -i 's/# cluster.name: my-application/cluster.name: clusterops/g' $elasticsearchfile
+#	sed -i "s///g" $elasticsearchfile
+#	sed -i "s///g" $elasticsearchfile
 
 	# Restart elasticsearch
 	echocolor "Khoi dong lai elasticsearch"
@@ -204,7 +216,12 @@ function install_nginx {
 	apt-get -y install nginx
 
 	# Thiet lap ssl truy cap tu nginx toi kibana
-	echo "$KIBANA_USER_LOGIN:`openssl passwd -apr1 $KIBANA_PASSWD_LOGIN`" | sudo tee -a /etc/nginx/htpasswd.users
+	local number=$1
+	if [ $number=1 ]; then
+		echo "$KIBANA_USER_LOGIN:`openssl passwd -apr1 $KIBANA_PASSWD_LOGIN`" | sudo tee -a /etc/nginx/htpasswd.users
+	else
+		break;
+	fi
 
 	echocolor "Chinh sua cau hinh Nginx"
 	sleep 3
@@ -259,10 +276,11 @@ function install_logstash {
 
 	echo "deb http://packages.elastic.co/logstash/2.3/debian stable main" | sudo tee -a /etc/apt/sources.list
 	apt-get update -y && apt-get install logstash -y
+}
+#	echocolor "Cau hinh Logstash"
+#	sleep 3
 
-	echocolor "Cau hinh Logstash"
-	sleep 3
-
+function config_ssl {
 	while [ "$SSL_BOOLEAN" = true ]; do
 		mkdir -p /etc/pki/tls/certs
 		mkdir -p /etc/pki/tls/private
@@ -292,8 +310,8 @@ function install_logstash {
 }
 
 function config_logstash_filebeat {
-	if [ "$FILEBEAT_BOOLEAN" = true ]; then
-	cat << 'EOF' > /etc/logstash/conf.d/02-beats-input.conf
+	if [ "$FILEBEAT_BOOLEAN" = true && "$SSL_BOOLEAN" = true ]; then
+	cat << EOF > /etc/logstash/conf.d/02-beats-input.conf
 	###
 	input {
 	  beats {
@@ -304,6 +322,16 @@ function config_logstash_filebeat {
 	  }
 	}
 EOF
+	else
+		cat << EOF > /etc/logstash/conf.d/02-beats-input.conf
+	###
+	input {
+	  beats {
+	    port => 5044
+	  }
+	}
+EOF
+
 
 	# Add port firewall
 	ufw allow 5044
