@@ -97,6 +97,8 @@ Thực hiện input template vào elasticsearch
 
 Chưa thực hiện cài đặt nên cũng chưa có nhận xét.
 
+Thực hiện cài đặt winlogbeat trên Server bằng powershell
+
 # TIP fix bug
 
 Filebeat
@@ -252,4 +254,6 @@ logging:
 # Tham khảo
 - [https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04](https://www.digitalocean.com/community/tutorials/how-to-gather-infrastructure-metrics-with-topbeat-and-elk-on-ubuntu-14-04)
 - [https://www.elastic.co/guide/en/beats/filebeat/current/how-filebeat-works.html](https://www.elastic.co/guide/en/beats/filebeat/current/how-filebeat-works.html)
-
+- [https://github.com/elastic/beats/blob/master/winlogbeat/docs/getting-started.asciidoc](https://github.com/elastic/beats/blob/master/winlogbeat/docs/getting-started.asciidoc)
+- [http://logz.io/blog/windows-event-log-analysis/](http://logz.io/blog/windows-event-log-analysis/)
+- [https://www.elastic.co/guide/en/beats/winlogbeat/1.3/enable-winlogbeat-debugging.html](https://www.elastic.co/guide/en/beats/winlogbeat/1.3/enable-winlogbeat-debugging.html)

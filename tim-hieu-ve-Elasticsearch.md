@@ -98,3 +98,4 @@ Link đăng nhập tại: http://IP_Elasticsearch:9200/_plugin/hq/
 - [https://github.com/elastic/elasticsearch](https://github.com/elastic/elasticsearch)
 - [https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
 - [http://blog.vnlives.net/2015/11/elasticsearch-la-gi.html](http://blog.vnlives.net/2015/11/elasticsearch-la-gi.html)
+- [https://chartio.com/resources/tutorials/how-to-delete-data-from-elasticsearch/](https://chartio.com/resources/tutorials/how-to-delete-data-from-elasticsearch/)

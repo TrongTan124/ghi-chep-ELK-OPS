@@ -140,7 +140,7 @@ function install_prepare {
 	apt-get update -y
 
 	# silent option
-	echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections #silent option
+	echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 select true" | sudo debconf-set-selections
 	echo "oracle-java8-installer shared/accepted-oracle-license-v1-1 seen true" | debconf-set-selections
 
 	apt-get install oracle-java8-installer -y
