@@ -216,3 +216,4 @@ Verify that the above setting has been set by running the following on each node
 
 - My experience
 - [https://www.elastic.co/guide/en/logstash/current/deploying-and-scaling.html](https://www.elastic.co/guide/en/logstash/current/deploying-and-scaling.html)
+- [https://www.elastic.co/guide/index.html](https://www.elastic.co/guide/index.html)
